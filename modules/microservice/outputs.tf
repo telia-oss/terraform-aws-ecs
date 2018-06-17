@@ -18,7 +18,7 @@ output "service_role_arn" {
 
 output "service_role_name" {
   description = "The name of the service role."
-  value       = "${module.service.service_name}"
+  value       = "${module.service.service_role_name}"
 }
 
 output "task_role_arn" {

@@ -12,7 +12,20 @@ data "aws_subnet_ids" "main" {
 
 data "aws_region" "current" {}
 
-# TODO: ALB module
+module "alb" {
+  source  = "telia-oss/loadbalancer/aws"
+  version = "0.1.0"
+
+  name_prefix = "example"
+  vpc_id      = "${data.aws_vpc.main.id}"
+  subnet_ids  = ["${data.aws_subnet_ids.main.ids}"]
+  type        = "application"
+
+  tags {
+    environment = "prod"
+    terraform   = "True"
+  }
+}
 
 # ------------------------------------------------------------------------------
 # ecs/cluster
@@ -20,9 +33,10 @@ data "aws_region" "current" {}
 module "cluster" {
   source = "../../modules/cluster"
 
-  name_prefix = "example"
-  vpc_id      = "${data.aws_vpc.main.id}"
-  subnet_ids  = ["${data.aws_subnet_ids.main.ids}"]
+  name_prefix  = "example"
+  vpc_id       = "${data.aws_vpc.main.id}"
+  subnet_ids   = ["${data.aws_subnet_ids.main.ids}"]
+  instance_ami = "<ecs-optimizied>"
 
   tags {
     environment = "prod"
@@ -34,16 +48,16 @@ module "cluster" {
 # ecs/service: Create a service which responds with 404 as the default target
 # ------------------------------------------------------------------------------
 module "four_o_four" {
-  source = "../service"
+  source = "../../modules/service"
 
-  name_prefix           = "example-bouncer"
-  vpc_id                = "${data.aws_vpc.main.id}"
-  cluster_id            = "${module.cluster.id}"
-  cluster_role_         = "${module.cluster.role_id}"
-  task_container_count  = "1"
-  task_definition_cpu   = "256"
-  task_definition_ram   = "512"
-  task_definition_image = "crccheck/hello-world:latest"
+  name_prefix                        = "example-bouncer"
+  vpc_id                             = "${data.aws_vpc.main.id}"
+  cluster_id                         = "${module.cluster.id}"
+  cluster_role_name                  = "${module.cluster.role_name}"
+  desired_count                      = "1"
+  task_definition_cpu                = "256"
+  task_definition_memory_reservation = "512"
+  task_definition_image              = "crccheck/hello-world:latest"
 
   target {
     protocol      = "HTTP"
@@ -91,17 +105,17 @@ resource "aws_security_group_rule" "ingress_80" {
 # (any request to example.com/app/* will be sent to this service)
 # ------------------------------------------------------------------------------
 module "application" {
-  source = "../microservice"
+  source = "../../modules/microservice"
 
-  name_prefix             = "example-app"
-  vpc_id                  = "${data.aws_vpc.main.id}"
-  cluster_id              = "${module.cluster.id}"
-  cluster_role_name       = "${module.cluster.role_name}"
-  desired_count           = "1"
-  task_definition_image   = "crccheck/hello-world:latest"
-  task_definition_cpu     = "256"
-  task_definition_ram     = "512"
-  task_definition_command = []
+  name_prefix                        = "example-app"
+  vpc_id                             = "${data.aws_vpc.main.id}"
+  cluster_id                         = "${module.cluster.id}"
+  cluster_role_name                  = "${module.cluster.role_name}"
+  desired_count                      = "1"
+  task_definition_image              = "crccheck/hello-world:latest"
+  task_definition_cpu                = "256"
+  task_definition_memory_reservation = "512"
+  task_definition_command            = []
 
   task_definition_environment = {
     "TEST" = "VALUE"
