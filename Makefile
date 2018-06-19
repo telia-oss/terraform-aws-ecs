@@ -17,7 +17,7 @@ test:
 		terraform init -backend=false >> /dev/null; \
 		terraform validate -check-variables=false; \
 		if [ $$? -eq 1 ]; then \
-			echo "✗ terraform validate: $$d"; \
+			echo "✗ terraform validate failed: $$d"; \
 			exit 1; \
 		fi; \
 		cd $(DIR); \
