@@ -56,6 +56,11 @@ variable "task_definition_environment" {
   default     = {}
 }
 
+variable "task_definition_environment_count" {
+  description = "NOTE: This exists purely to calculate count in Terraform. Should equal the length of your environment map."
+  default     = 0
+}
+
 variable "task_definition_health_check_grace_period" {
   description = "Seconds to ignore failing load balancer health checks on newly instantiated tasks to prevent premature shutdown, up to 7200."
   default     = "0"
