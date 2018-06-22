@@ -72,7 +72,7 @@ data "aws_iam_policy_document" "permissions" {
 
 module "asg" {
   source  = "telia-oss/asg/aws"
-  version = "0.1.0"
+  version = "0.1.1"
 
   name_prefix          = "${var.name_prefix}-cluster"
   user_data            = "${data.template_file.main.rendered}"
