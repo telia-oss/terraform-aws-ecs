@@ -36,7 +36,7 @@ module "cluster" {
   name_prefix  = "example"
   vpc_id       = "${data.aws_vpc.main.id}"
   subnet_ids   = ["${data.aws_subnet_ids.main.ids}"]
-  instance_ami = "<ecs-optimizied>"
+  instance_ami = "ami-c91624b0"
 
   tags {
     environment = "prod"
