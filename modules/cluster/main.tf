@@ -72,7 +72,7 @@ data "aws_iam_policy_document" "permissions" {
 
 module "asg" {
   source  = "telia-oss/asg/aws"
-  version = "0.1.1"
+  version = "0.2.0"
 
   name_prefix          = "${var.name_prefix}-cluster"
   user_data            = "${data.template_file.main.rendered}"
@@ -88,7 +88,15 @@ module "asg" {
   instance_ami         = "${var.instance_ami}"
   instance_key         = "${var.instance_key}"
   instance_volume_size = "${var.instance_volume_size}"
-  tags                 = "${var.tags}"
+
+  ebs_block_devices = [{
+    device_name           = "/dev/xvdcz"
+    volume_type           = "gp2"
+    volume_size           = "${var.docker_volume_size}"
+    delete_on_termination = true
+  }]
+
+  tags = "${var.tags}"
 }
 
 resource "aws_security_group_rule" "ingress" {

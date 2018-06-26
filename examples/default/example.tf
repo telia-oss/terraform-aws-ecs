@@ -33,10 +33,12 @@ module "alb" {
 module "cluster" {
   source = "../../modules/cluster"
 
-  name_prefix  = "example"
-  vpc_id       = "${data.aws_vpc.main.id}"
-  subnet_ids   = ["${data.aws_subnet_ids.main.ids}"]
-  instance_ami = "<ecs-optimizied>"
+  name_prefix         = "example"
+  vpc_id              = "${data.aws_vpc.main.id}"
+  subnet_ids          = ["${data.aws_subnet_ids.main.ids}"]
+  instance_ami        = "ami-c91624b0"
+  load_balancers      = ["${module.alb.security_group_id}"]
+  load_balancer_count = 1
 
   tags {
     environment = "prod"
@@ -55,20 +57,20 @@ module "four_o_four" {
   cluster_id                         = "${module.cluster.id}"
   cluster_role_name                  = "${module.cluster.role_name}"
   desired_count                      = "1"
-  task_definition_cpu                = "256"
-  task_definition_memory_reservation = "512"
-  task_definition_image              = "crccheck/hello-world:latest"
+  task_definition_cpu                = "128"
+  task_definition_memory_reservation = "256"
+  task_definition_image              = "teliaoss/four-o-four:latest"
 
   target {
     protocol      = "HTTP"
-    port          = "8000"
+    port          = "8080"
     load_balancer = "${module.alb.arn}"
   }
 
   health {
     port    = "traffic-port"
     path    = "/"
-    matcher = "200"
+    matcher = "404"
   }
 
   tags {
@@ -113,8 +115,8 @@ module "application" {
   cluster_role_name                  = "${module.cluster.role_name}"
   desired_count                      = "1"
   task_definition_image              = "crccheck/hello-world:latest"
-  task_definition_cpu                = "256"
-  task_definition_memory_reservation = "512"
+  task_definition_cpu                = "128"
+  task_definition_memory_reservation = "256"
   task_definition_command            = []
 
   task_definition_environment = {

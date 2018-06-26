@@ -33,6 +33,11 @@ variable "instance_volume_size" {
   default     = "8"
 }
 
+variable "docker_volume_size" {
+  description = "The size of the docker volume (/dev/xvdcz) in gigabytes."
+  default     = "22"
+}
+
 variable "min_size" {
   description = "The minimum (and desired) size of the cluster."
   default     = "1"
