@@ -39,6 +39,8 @@ module "cluster" {
   instance_ami         = "ami-c91624b0"
   instance_volume_size = "10"
   docker_volume_size   = "30"
+  load_balancers       = ["${module.alb.security_group_id}"]
+  load_balancer_count  = 1
 
   tags {
     environment = "prod"

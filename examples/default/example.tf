@@ -33,10 +33,12 @@ module "alb" {
 module "cluster" {
   source = "../../modules/cluster"
 
-  name_prefix  = "example"
-  vpc_id       = "${data.aws_vpc.main.id}"
-  subnet_ids   = ["${data.aws_subnet_ids.main.ids}"]
-  instance_ami = "ami-c91624b0"
+  name_prefix         = "example"
+  vpc_id              = "${data.aws_vpc.main.id}"
+  subnet_ids          = ["${data.aws_subnet_ids.main.ids}"]
+  instance_ami        = "ami-c91624b0"
+  load_balancers      = ["${module.alb.security_group_id}"]
+  load_balancer_count = 1
 
   tags {
     environment = "prod"
