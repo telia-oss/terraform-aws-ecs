@@ -8,7 +8,7 @@ resource "aws_ecs_cluster" "main" {
 }
 
 resource "aws_cloudwatch_log_group" "main" {
-  name = "${var.name_prefix}-cluster-agent"
+  name = "${var.name_prefix}-cluster-instances"
 }
 
 data "template_file" "main" {
