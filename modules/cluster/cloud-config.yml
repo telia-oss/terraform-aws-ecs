@@ -18,15 +18,10 @@ write_files:
               "metrics_collected": {
                   "disk": {
                       "resources": [
-                          "/"
+                          "*"
                       ],
                       "measurement": [
-                          "total",
-                          "used"
-                      ],
-                      "ignore_file_system_types": [
-                          "sysfs",
-                          "devtmpfs"
+                          "disk_used_percent"
                       ],
                       "metrics_collection_interval": 60
                   },
