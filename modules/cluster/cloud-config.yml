@@ -1,28 +1,74 @@
 #cloud-config
 package_update: true
 packages:
-  - awslogs
   - aws-cfn-bootstrap
+  - unzip
 write_files:
-  - path: "/etc/awslogs/awscli.template"
+  - path: "/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json"
     permissions: "0644"
     owner: "root"
     content: |
-      [plugins]
-      cwlogs = cwlogs
-      [default]
-      region = ${region}
-  - path: "/etc/awslogs/awslogs.template"
-    permissions: "0644"
-    owner: "root"
-    content: |
-      [general]
-      state_file = /var/lib/awslogs/agent-state
+      {
+          "agent": {
+              "region": "${region}",
+              "metrics_collection_interval": 60,
+              "logfile": "/opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log"
+          },
+          "metrics": {
+              "metrics_collected": {
+                  "disk": {
+                      "resources": [
+                          "*"
+                      ],
+                      "measurement": [
+                          "disk_used_percent"
+                      ],
+                      "metrics_collection_interval": 60
+                  },
+                  "swap": {
+                      "measurement": [
+                          "swap_used_percent"
+                      ],
+                      "metrics_collection_interval": 5
+                  },
+                  "mem": {
+                      "measurement": [
+                          "mem_used_percent"
+                      ],
+                      "metrics_collection_interval": 5
+                  }
+              },
+              "append_dimensions": {
+                  "ImageId": "$${aws:ImageId}",
+                  "InstanceId": "$${aws:InstanceId}",
+                  "InstanceType": "$${aws:InstanceType}",
+                  "AutoScalingGroupName": "$${aws:AutoScalingGroupName}"
+              },
+              "aggregation_dimensions": [["InstanceId"], ["AutoScalingGroupName"]]
+          },
+          "logs": {
+              "logs_collected": {
+                  "files": {
+                      "collect_list": [
+                          {
+                              "file_path": "/opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log*",
+                              "log_group_name": "${log_group_name}",
+                              "log_stream_name": "{instance_id}/amazon-cloudwatch-agent",
+                              "timezone": "UTC"
+                          },
+                          {
+                              "file_path": "/var/log/ecs/ecs-agent.log*",
+                              "log_group_name": "${log_group_name}",
+                              "log_stream_name": "{instance_id}/amazon-ecs-agent",
+                              "timezone": "UTC"
+                          }
+                      ]
+                  }
+              },
+              "log_stream_name": "{instance_id}/untitled-logs"
+          }
+      }
 
-      [/var/log/ecs/ecs-agent.log]
-      file = /var/log/ecs/ecs-agent.log*
-      log_group_name = ${log_group_name}
-      log_stream_name = {instance_id}
   - path: "/etc/ecs/ecs.config"
     permissions: "0744"
     owner: "root"
@@ -55,26 +101,12 @@ runcmd:
   - |
     yum install -y https://amazon-ssm-${region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
   - |
-    cp /etc/awslogs/awscli.template /etc/awslogs/awscli.conf
-    cp /etc/awslogs/awslogs.template /etc/awslogs/awslogs.conf
+    mkdir -p /tmp/cloudwatchagent && cd /tmp/cloudwatchagent
+    curl -O https://s3.amazonaws.com/amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip
+    unzip AmazonCloudWatchAgent.zip && ./install.sh
+    rm -rf /tmp/cloudwatchagent
+    start amazon-cloudwatch-agent
   - |
     start ecs
-    service awslogs start
-  - |
     /usr/local/scripts/cloudformation-signal.sh
     /opt/aws/bin/cfn-signal -e $? --stack ${stack_name} --resource AutoScalingGroup --region ${region}
-  - |
-    yum install zip unzip cpan perl-Switch perl-DateTime perl-Sys-Syslog perl-LWP-Protocol-https -y
-    (echo y; echo o conf prerequisites_policy follow; echo o conf commit) | cpan
-    perl -MCPAN -e 'install Digest::SHA'
-    perl -MCPAN -e 'install URI::Escape'
-    perl -MCPAN -e 'install Bundle::LWP'
-    perl -MCPAN -e 'install MIME::Base64'
-    perl -MCPAN -e 'install Crypt::SSLeay'
-    perl -MCPAN -e 'install XML::LibXML'
-    cd /opt
-    curl https://aws-cloudwatch.s3.amazonaws.com/downloads/CloudWatchMonitoringScripts-1.2.2.zip -O
-    unzip CloudWatchMonitoringScripts-1.2.2.zip
-    rm /opt/CloudWatchMonitoringScripts-1.2.2.zip
-    echo "* * * * * root /opt/aws-scripts-mon/mon-put-instance-data.pl --mem-used-incl-cache-buff --mem-util --from-cron  --auto-scaling" > /etc/cron.d/aws_metrics
-
