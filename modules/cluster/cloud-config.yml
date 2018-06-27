@@ -57,12 +57,6 @@ write_files:
                               "timezone": "UTC"
                           },
                           {
-                              "file_path": "/var/log/amazon/ssm/amazon-ssm-agent.log*",
-                              "log_group_name": "${log_group_name}",
-                              "log_stream_name": "{instance_id}/amazon-ssm-agent",
-                              "timezone": "UTC"
-                          },
-                          {
                               "file_path": "/var/log/ecs/ecs-agent.log*",
                               "log_group_name": "${log_group_name}",
                               "log_stream_name": "{instance_id}/amazon-ecs-agent",
