@@ -52,6 +52,8 @@ data "aws_iam_policy_document" "permissions" {
       "logs:CreateLogGroup",
       "logs:PutLogEvents",
       "ssm:GetParameter",
+      "cloudwatch:DescribeAlarms",
+      "cloudwatch:PutMetricAlarm"
     ]
   }
 
