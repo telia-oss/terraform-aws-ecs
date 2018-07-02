@@ -114,19 +114,19 @@ write_files:
 
         # convert units back to bytes as both docker api and cli only provide freindly units
         if [[ "$1" =~ ([0-9\.]*)B ]] ; then
-          echo "${!BASH_REMATCH[1]}"
+          echo "$${BASH_REMATCH[1]}"
         fi
         if [[ "$1" =~ ([0-9\.]*)KB ]] ; then
-          awk 'BEGIN{ printf "%.0f\n", '${!BASH_REMATCH[1]}' * 1000 }'
+          awk 'BEGIN{ printf "%.0f\n", '$${BASH_REMATCH[1]}' * 1000 }'
         fi
         if [[ "$1" =~ ([0-9\.]*)MB ]] ; then
-          awk 'BEGIN{ printf "%.0f\n", '${!BASH_REMATCH[1]}' * 1000**2 }'
+          awk 'BEGIN{ printf "%.0f\n", '$${BASH_REMATCH[1]}' * 1000**2 }'
         fi
         if [[ "$1" =~ ([0-9\.]*)GB ]] ; then
-          awk 'BEGIN{ printf "%.0f\n", '${!BASH_REMATCH[1]}' * 1000**3 }'
+          awk 'BEGIN{ printf "%.0f\n", '$${BASH_REMATCH[1]}' * 1000**3 }'
         fi
         if [[ "$1" =~ ([0-9\.]*)TB ]] ; then
-          awk 'BEGIN{ printf "%.0f\n", '${!BASH_REMATCH[1]}' * 1000**4 }'
+          awk 'BEGIN{ printf "%.0f\n", '$${BASH_REMATCH[1]}' * 1000**4 }'
         fi
       }
 
