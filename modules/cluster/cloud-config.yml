@@ -163,10 +163,10 @@ write_files:
       aws cloudwatch put-metric-data --value $utilize --namespace "System/Linux" --dimensions "InstanceId=$AWSINSTANCEID" --unit Percent --metric-name UtilizationDataStorage --region $AWSREGION
 
   - path: "/etc/cron.d/ecs_drive_monitoring"
-    permissions: "0744"
+    permissions: "0644"
     owner: "root"
     content: |
-      *  *  *  *  *   bash /opt/metricscript.sh
+      * * * * *    root /opt/metricscript.sh
 
 runcmd:
   - |
