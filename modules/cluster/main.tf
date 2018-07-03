@@ -52,8 +52,6 @@ data "aws_iam_policy_document" "permissions" {
       "logs:CreateLogGroup",
       "logs:PutLogEvents",
       "ssm:GetParameter",
-      "cloudwatch:DescribeAlarms",
-      "cloudwatch:PutMetricAlarm"
     ]
   }
 
@@ -109,4 +107,26 @@ resource "aws_security_group_rule" "ingress" {
   from_port                = "32768"
   to_port                  = "65535"
   source_security_group_id = "${element(var.load_balancers, count.index)}"
+}
+
+resource "random_integer" "alarm_random_postfix" {
+  min = 11111
+  max = 99999
+}
+
+resource "aws_cloudwatch_metric_alarm" "UtilizationDataStorageAlarm" {
+  count               = "${var.allow_docker_drive_monitoring == true ? 1 : 0}"
+  alarm_name          = "ecs-volume-usage-${random_integer.alarm_random_postfix.result}"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "UtilizationDataStorage"
+  namespace           = "System/Linux"
+  period              = "60"
+  statistic           = "Average"
+  threshold           = "${var.docker_drive_monitoring_threshold}"
+  alarm_description   = "Alarm when docker volume usage reach ${var.docker_drive_monitoring_threshold} percent"
+
+  dimensions {
+    AutoScalingGroupName = "${module.asg.id}"
+  }
 }

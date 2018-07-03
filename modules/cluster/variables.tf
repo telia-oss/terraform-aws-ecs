@@ -1,6 +1,16 @@
 # ------------------------------------------------------------------------------
 # Variables
 # ------------------------------------------------------------------------------
+variable "docker_drive_monitoring_threshold" {
+  description = "Threshold for monitoring the ECS docker drive."
+  default     = 80
+}
+
+variable "allow_docker_drive_monitoring" {
+  description = "Flag to create/not the alarm regarding the inner docker volume."
+  default     = false
+}
+
 variable "name_prefix" {
   description = "A prefix used for naming resources."
 }

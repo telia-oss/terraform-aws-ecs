@@ -162,17 +162,6 @@ write_files:
       utilize=`awk 'BEGIN{ printf "%.0f\n", ('$total_data' - '$available_data')/'$total_data' * 100 }'`
       aws cloudwatch put-metric-data --value $utilize --namespace "System/Linux" --dimensions "InstanceId=$AWSINSTANCEID" --unit Percent --metric-name UtilizationDataStorage --region $AWSREGION
 
-      [[ -z `aws cloudwatch describe-alarms --region $AWSREGION --alarm-names "ecs-volume-usage" | jq -r '.MetricAlarms' | grep "AlarmArn"` ]] && \
-          aws cloudwatch put-metric-alarm --region $AWSREGION \
-                                          --alarm-name "ecs-volume-usage" \
-                                          --alarm-description "Alarm when docker volume usage reach 80 percent" \
-                                          --metric-name "UtilizationDataStorage" \
-                                          --namespace "System/Linux" \
-                                          --statistic Average \
-                                          --period 60 --threshold 80 --comparison-operator GreaterThanThreshold \
-                                          --dimensions "Name=InstanceId,Value=$AWSINSTANCEID" \
-                                          --evaluation-periods 2 --unit Percent
-
   - path: "/etc/cron.d/ecs_drive_monitoring"
     permissions: "0744"
     owner: "root"
