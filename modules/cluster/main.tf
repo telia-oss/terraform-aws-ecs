@@ -52,6 +52,7 @@ data "aws_iam_policy_document" "permissions" {
       "logs:CreateLogGroup",
       "logs:PutLogEvents",
       "ssm:GetParameter",
+      "autoscaling:DescribeAutoScalingInstances"
     ]
   }
 
