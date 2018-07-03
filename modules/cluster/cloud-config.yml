@@ -148,12 +148,12 @@ write_files:
         fi
       }
 
-      asg_name=`aws --region eu-west-1 autoscaling describe-auto-scaling-instances --instance-ids="$AWSINSTANCEID" | jq -r .AutoScalingInstances[0].AutoScalingGroupName`
+      ASG_NAME=`aws --region $AWSREGION autoscaling describe-auto-scaling-instances --instance-ids="$AWSINSTANCEID" | jq -r .AutoScalingInstances[0].AutoScalingGroupName`
 
       data=$(convertUnits `getAvailableMetric Data`)
-      aws cloudwatch put-metric-data --value $data --namespace "System/Linux" --dimensions InstanceId=$AWSINSTANCEID,AutoScalingGroupName=$${asg_name} --unit Bytes --metric-name FreeDataStorage --region $AWSREGION
+      aws cloudwatch put-metric-data --value $data --namespace "System/Linux" --dimensions AutoScalingGroupName=$${ASG_NAME} --unit Bytes --metric-name FreeDataStorage --region $AWSREGION
       data=$(convertUnits `getAvailableMetric Metadata`)
-      aws cloudwatch put-metric-data --value $data --namespace "System/Linux" --dimensions InstanceId=$AWSINSTANCEID,AutoScalingGroupName=$${asg_name} --unit Bytes --metric-name FreeMetadataStorage --region $AWSREGION
+      aws cloudwatch put-metric-data --value $data --namespace "System/Linux" --dimensions AutoScalingGroupName=$${ASG_NAME} --unit Bytes --metric-name FreeMetadataStorage --region $AWSREGION
 
       total_data=$(convertUnits `getTotalMetric Data`)
       available_data=$(convertUnits `getAvailableMetric Data`)
@@ -162,7 +162,7 @@ write_files:
       total_data=`echo -n $total_data`
 
       utilize=`awk 'BEGIN{ printf "%.0f\n", ('$total_data' - '$available_data')/'$total_data' * 100 }'`
-      aws cloudwatch put-metric-data --value $utilize --namespace "System/Linux" --dimensions "InstanceId=$AWSINSTANCEID,AutoScalingGroupName=$${asg_name}" --unit Percent --metric-name UtilizationDataStorage --region $AWSREGION
+      aws cloudwatch put-metric-data --value $utilize --namespace "System/Linux" --dimensions "AutoScalingGroupName=$${ASG_NAME}" --unit Percent --metric-name UtilizationDataStorage --region $AWSREGION
 
   - path: "/etc/cron.d/ecs_drive_monitoring"
     permissions: "0644"
