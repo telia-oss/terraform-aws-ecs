@@ -115,7 +115,7 @@ resource "random_integer" "alarm_random_postfix" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "UtilizationDataStorageAlarm" {
-  count               = "${var.allow_docker_drive_monitoring == true ? 1 : 0}"
+  count               = "${var.allow_docker_drive_monitoring ? 1 : 0}"
   alarm_name          = "ecs-volume-usage-${random_integer.alarm_random_postfix.result}"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = "2"
