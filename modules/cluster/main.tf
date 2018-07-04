@@ -21,7 +21,7 @@ data "template_file" "main" {
     ecs_cluster_name   = "${aws_ecs_cluster.main.name}"
     ecs_log_level      = "${var.ecs_log_level}"
     custom_script_data = "${var.custom_script_data}"
-    logging_drivers    = "${var.logging_drivers}"
+    logging_drivers    = ["${var.logging_drivers}"]
   }
 }
 
