@@ -1,14 +1,45 @@
 # ------------------------------------------------------------------------------
 # Variables
 # ------------------------------------------------------------------------------
-variable "docker_drive_monitoring_threshold" {
-  description = "Threshold for monitoring the ECS docker drive."
-  default     = 80
+
+variable "logging_drivers" {
+  description = "Logging drivers used in ECS instances."
+  default     = ["awslogs"]
 }
 
-variable "allow_docker_drive_monitoring" {
-  description = "Flag to create/not the alarm regarding the inner docker volume."
-  default     = false
+variable "custom_script_data" {
+  description = "Custom user data script to be started on instance creation."
+  default     = ""
+}
+
+variable "allowed_actions" {
+  description = "Allowed actions in AWS policy document."
+
+  default = [
+    "ecr:GetAuthorizationToken",
+    "ecr:BatchCheckLayerAvailability",
+    "ecr:GetDownloadUrlForLayer",
+    "ecr:GetRepositoryPolicy",
+    "ecr:DescribeRepositories",
+    "ecr:ListImages",
+    "ecr:DescribeImages",
+    "ecr:BatchGetImage",
+    "ecs:CreateCluster",
+    "ecs:DeregisterContainerInstance",
+    "ecs:DiscoverPollEndpoint",
+    "ecs:Poll",
+    "ecs:RegisterContainerInstance",
+    "ecs:StartTelemetrySession",
+    "ecs:Submit*",
+    "logs:CreateLogStream",
+    "cloudwatch:PutMetricData",
+    "ec2:DescribeTags",
+    "logs:DescribeLogStreams",
+    "logs:CreateLogGroup",
+    "logs:PutLogEvents",
+    "ssm:GetParameter",
+    "autoscaling:DescribeAutoScalingInstances",
+  ]
 }
 
 variable "name_prefix" {
