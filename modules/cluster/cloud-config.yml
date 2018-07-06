@@ -97,12 +97,6 @@ write_files:
       }
       await_process "/usr/libexec/amazon-ecs-init start"
 
-  - path: "/tmp/custom_script"
-    permissions: "0744"
-    owner: "root"
-    content: |
-      ${custom_script_data}
-
 runcmd:
   - |
     yum install -y https://amazon-ssm-${region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
@@ -116,5 +110,3 @@ runcmd:
     start ecs
     /usr/local/scripts/cloudformation-signal.sh
     /opt/aws/bin/cfn-signal -e $? --stack ${stack_name} --resource AutoScalingGroup --region ${region}
-  - |
-    /tmp/custom_script.sh
