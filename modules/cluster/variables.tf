@@ -4,42 +4,18 @@
 
 variable "logging_drivers" {
   description = "Logging drivers used in ECS instances."
+  type        = "list"
   default     = ["awslogs"]
 }
 
-variable "custom_script_data" {
+variable "custom_user_data" {
   description = "Custom user data script to be started on instance creation."
   default     = ""
 }
 
-variable "allowed_actions" {
-  description = "Allowed actions in AWS policy document."
-
-  default = [
-    "ecr:GetAuthorizationToken",
-    "ecr:BatchCheckLayerAvailability",
-    "ecr:GetDownloadUrlForLayer",
-    "ecr:GetRepositoryPolicy",
-    "ecr:DescribeRepositories",
-    "ecr:ListImages",
-    "ecr:DescribeImages",
-    "ecr:BatchGetImage",
-    "ecs:CreateCluster",
-    "ecs:DeregisterContainerInstance",
-    "ecs:DiscoverPollEndpoint",
-    "ecs:Poll",
-    "ecs:RegisterContainerInstance",
-    "ecs:StartTelemetrySession",
-    "ecs:Submit*",
-    "logs:CreateLogStream",
-    "cloudwatch:PutMetricData",
-    "ec2:DescribeTags",
-    "logs:DescribeLogStreams",
-    "logs:CreateLogGroup",
-    "logs:PutLogEvents",
-    "ssm:GetParameter",
-    "autoscaling:DescribeAutoScalingInstances",
-  ]
+variable "custom_permissions" {
+  description = "Custom JSON permissions list."
+  default     = ""
 }
 
 variable "name_prefix" {
