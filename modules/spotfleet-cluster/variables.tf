@@ -1,3 +1,7 @@
+variable "instance_ami" {
+  description = "The EC2 (ECS optimizied) image ID to launch."
+}
+
 variable "name_prefix" {
   description = "A prefix used for naming resources."
 }
@@ -15,6 +19,27 @@ variable "subnet_ids" {
   type        = "list"
 }
 
+variable "allocation_strategy" {
+  description = "Allocation stragegy either lowestPrice or diversified"
+  default     = "lowestPrice"
+}
+
+variable "ecs_log_level" {
+  description = "Log level for the ECS agent."
+  default     = "info"
+}
+
+variable "load_balancer_count" {
+  description = "HACK: This exists purely to calculate count in Terraform. Should equal the length of your ingress map."
+  default     = 0
+}
+
+variable "load_balancers" {
+  description = "List of load balancer security groups that can ingress on the dynamic port range."
+  type        = "list"
+  default     = []
+}
+
 variable "pre-defined-spotrequest" {
   description = "Which pre defined spot request list to use: small, small-ipv6, medium, medium-ipv6, large, large-ipv6"
   default     = "small"
@@ -25,14 +50,10 @@ variable "spot_price" {
   default     = "0.05"
 }
 
-variable "allocation_strategy" {
-  description = "Allocation stragegy either lowestPrice or diversified"
-  default     = "lowestPrice"
-}
-
-variable "instance_ami" {
-  description = "The EC2 image ID to launch. - default is Amazon ESC-optimized AMI in eu-west-1"
-  default     = "ami-921423eb"
+variable "tags" {
+  description = "A map of tags (key-value pairs) passed to resources."
+  type        = "map"
+  default     = {}
 }
 
 variable "valid_until" {
@@ -40,30 +61,3 @@ variable "valid_until" {
   default     = "2028-05-03T00:00:00Z"
 }
 
-variable "tags" {
-  description = "A map of tags (key-value pairs) passed to resources."
-  type        = "map"
-  default     = {}
-}
-
-variable "ecs_log_level" {
-  description = "Log level for the ECS agent."
-  default     = "info"
-}
-
-variable "load_balancers" {
-  description = "List of load balancer security groups that can ingress on the dynamic port range."
-  type        = "list"
-  default     = []
-}
-
-variable "load_balancer_count" {
-  description = "HACK: This exists purely to calculate count in Terraform. Should equal the length of your ingress map."
-  default     = 0
-}
-
-# Hack to overcome that count variables cannot be inferred
-variable "subnet_count" {
-  description = "For future use: count of subnets - current predefined spot requests are for 3 subnets"
-  default     = 3
-}
