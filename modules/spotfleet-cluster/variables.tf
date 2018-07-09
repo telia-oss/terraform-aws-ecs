@@ -60,4 +60,3 @@ variable "valid_until" {
   description = "Valid to date for the spot requests - after this date instances will not be replaced"
   default     = "2028-05-03T00:00:00Z"
 }
-
