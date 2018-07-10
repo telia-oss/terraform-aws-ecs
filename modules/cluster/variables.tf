@@ -1,6 +1,12 @@
 # ------------------------------------------------------------------------------
 # Variables
 # ------------------------------------------------------------------------------
+
+variable "user_data" {
+  description = "The user data to provide when launching the instance."
+  default     = ""
+}
+
 variable "name_prefix" {
   description = "A prefix used for naming resources."
 }

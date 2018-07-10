@@ -75,7 +75,7 @@ module "asg" {
   version = "0.2.0"
 
   name_prefix          = "${var.name_prefix}-cluster"
-  user_data            = "${data.template_file.main.rendered}"
+  user_data            = "${coalesce(var.user_data, data.template_file.main.rendered)}"
   vpc_id               = "${var.vpc_id}"
   subnet_ids           = "${var.subnet_ids}"
   await_signal         = "true"
