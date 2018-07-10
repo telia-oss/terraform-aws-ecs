@@ -28,7 +28,7 @@ module "alb" {
 }
 
 # ------------------------------------------------------------------------------
-# ecs/cluster
+# ecs/cluster - ami-c91624b0 is an Amazon ECS Optimised AMI.
 # ------------------------------------------------------------------------------
 module "cluster" {
   source = "../../modules/cluster"
