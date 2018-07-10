@@ -2,19 +2,8 @@
 # Variables
 # ------------------------------------------------------------------------------
 
-variable "logging_drivers" {
-  description = "Logging drivers used in ECS instances."
-  type        = "list"
-  default     = ["awslogs"]
-}
-
-variable "custom_user_data" {
-  description = "Custom user data script to be started on instance creation."
-  default     = ""
-}
-
-variable "custom_permissions" {
-  description = "Custom JSON permissions list."
+variable "user_data" {
+  description = "The user data to provide when launching the instance."
   default     = ""
 }
 
