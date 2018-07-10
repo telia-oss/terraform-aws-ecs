@@ -30,13 +30,26 @@ module "alb" {
 # ------------------------------------------------------------------------------
 # ecs/cluster
 # ------------------------------------------------------------------------------
+data "aws_ami" "ecs" {
+  owners              = ["amazon"]
+  most_recent         = true
+  virtualization_type = "hvm"
+  architecture        = "x86_64"
+  root_device_type    = "ebs"
+
+  filter {
+    name   = "name"
+    values = ["amzn-ami*amazon-ecs-optimized"]
+  }
+}
+
 module "cluster" {
   source = "../../modules/cluster"
 
   name_prefix         = "example"
   vpc_id              = "${data.aws_vpc.main.id}"
   subnet_ids          = ["${data.aws_subnet_ids.main.ids}"]
-  instance_ami        = "ami-c91624b0"
+  instance_ami        = "${data.aws_ami.ecs.id}"
   load_balancers      = ["${module.alb.security_group_id}"]
   load_balancer_count = 1
 
@@ -166,4 +179,8 @@ data "aws_iam_policy_document" "privileges" {
       "*",
     ]
   }
+}
+
+output "ami" {
+  value = "${data.aws_ami.ecs.id}"
 }

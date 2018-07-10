@@ -46,17 +46,22 @@ data "aws_ami" "ecs" {
 module "cluster" {
   source = "../../modules/cluster"
 
-  name_prefix          = "example"
-  vpc_id               = "${data.aws_vpc.main.id}"
-  subnet_ids           = ["${data.aws_subnet_ids.main.ids}"]
-  instance_ami         = "${data.aws_ami.ecs.id}"
-  instance_volume_size = "10"
-  docker_volume_size   = "30"
-  load_balancers       = ["${module.alb.security_group_id}"]
-  load_balancer_count  = 1
+  name_prefix         = "example"
+  vpc_id              = "${data.aws_vpc.main.id}"
+  subnet_ids          = ["${data.aws_subnet_ids.main.ids}"]
+  instance_ami        = "${data.aws_ami.ecs.id}"
+  load_balancers      = ["${module.alb.security_group_id}"]
+  load_balancer_count = 1
 
   tags {
     environment = "prod"
     terraform   = "True"
   }
+}
+
+module "graceful-shutdown" {
+  source = "github.com/itsdalmo/tf_aws_ecs_instance_draining_on_scale_in.git?ref=b87f60f"
+
+  name_prefix            = "example"
+  autoscaling_group_name = "${module.cluster.asg_id}"
 }
