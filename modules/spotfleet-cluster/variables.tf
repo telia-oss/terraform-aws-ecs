@@ -20,7 +20,7 @@ variable "subnet_ids" {
 }
 
 variable "allocation_strategy" {
-  description = "Allocation stragegy either lowestPrice or diversified"
+  description = "Allocation strategy either lowestPrice or diversified"
   default     = "lowestPrice"
 }
 
