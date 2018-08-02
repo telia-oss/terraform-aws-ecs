@@ -14,7 +14,7 @@ module "service" {
   task_container_image              = "${var.task_container_image}"
   task_container_command            = "${var.task_container_command}"
   task_container_environment        = "${var.task_container_environment}"
-  health                            = "${var.health}"
+  health_check                      = "${var.health_check}"
   health_check_grace_period         = "${var.health_check_grace_period}"
 
   target {

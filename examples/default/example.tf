@@ -80,7 +80,7 @@ module "four_o_four" {
     load_balancer = "${module.alb.arn}"
   }
 
-  health {
+  health_check {
     port    = "traffic-port"
     path    = "/"
     matcher = "404"
@@ -149,7 +149,7 @@ module "application" {
     load_balancer = "${module.alb.arn}"
   }
 
-  health {
+  health_check {
     port    = "traffic-port"
     path    = "/"
     matcher = "200"

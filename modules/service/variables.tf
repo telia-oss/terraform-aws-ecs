@@ -22,7 +22,7 @@ variable "target" {
   type        = "map"
 }
 
-variable "health" {
+variable "health_check" {
   description = "A health block containing health check settings for the target group. Overrides the defaults."
   type        = "map"
 }

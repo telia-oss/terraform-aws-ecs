@@ -15,7 +15,7 @@ resource "aws_lb_target_group" "main" {
   vpc_id       = "${var.vpc_id}"
   protocol     = "${var.target["protocol"]}"
   port         = "${var.target["port"]}"
-  health_check = ["${var.health}"]
+  health_check = ["${var.health_check}"]
 
   # NOTE: TF is unable to destroy a target group while a listener is attached,
   # therefor we have to create a new one before destroying the old. This also means
