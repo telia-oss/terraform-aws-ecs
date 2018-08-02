@@ -65,14 +65,14 @@ module "cluster" {
 module "four_o_four" {
   source = "../../modules/service"
 
-  name_prefix                        = "example-bouncer"
-  vpc_id                             = "${data.aws_vpc.main.id}"
-  cluster_id                         = "${module.cluster.id}"
-  cluster_role_name                  = "${module.cluster.role_name}"
-  desired_count                      = "1"
-  task_definition_cpu                = "128"
-  task_definition_memory_reservation = "256"
-  task_definition_image              = "teliaoss/four-o-four:latest"
+  name_prefix                       = "example-bouncer"
+  vpc_id                            = "${data.aws_vpc.main.id}"
+  cluster_id                        = "${module.cluster.id}"
+  cluster_role_name                 = "${module.cluster.role_name}"
+  desired_count                     = "1"
+  task_container_cpu                = "128"
+  task_container_memory_reservation = "256"
+  task_container_image              = "teliaoss/four-o-four:latest"
 
   target {
     protocol      = "HTTP"
@@ -122,17 +122,17 @@ resource "aws_security_group_rule" "ingress_80" {
 module "application" {
   source = "../../modules/microservice"
 
-  name_prefix                        = "example-app"
-  vpc_id                             = "${data.aws_vpc.main.id}"
-  cluster_id                         = "${module.cluster.id}"
-  cluster_role_name                  = "${module.cluster.role_name}"
-  desired_count                      = "1"
-  task_definition_image              = "crccheck/hello-world:latest"
-  task_definition_cpu                = "128"
-  task_definition_memory_reservation = "256"
-  task_definition_command            = []
+  name_prefix                       = "example-app"
+  vpc_id                            = "${data.aws_vpc.main.id}"
+  cluster_id                        = "${module.cluster.id}"
+  cluster_role_name                 = "${module.cluster.role_name}"
+  desired_count                     = "1"
+  task_container_image              = "crccheck/hello-world:latest"
+  task_container_cpu                = "128"
+  task_container_memory_reservation = "256"
+  task_container_command            = []
 
-  task_definition_environment = {
+  task_container_environment = {
     "TEST" = "VALUE"
   }
 

@@ -31,10 +31,10 @@ resource "aws_ecs_service" "main" {
   depends_on                        = ["data.aws_lb_target_group.default", "aws_iam_role_policy.service_permissions"]
   name                              = "${var.name_prefix}"
   cluster                           = "${var.cluster_id}"
-  task_definition                   = "${aws_ecs_task_definition.main.arn}"
+  task_container                    = "${aws_ecs_task_container.main.arn}"
   desired_count                     = "${var.desired_count}"
   iam_role                          = "${aws_iam_role.service.arn}"
-  health_check_grace_period_seconds = "${var.task_definition_health_check_grace_period}"
+  health_check_grace_period_seconds = "${var.health_check_grace_period}"
 
   deployment_minimum_healthy_percent = 50
   deployment_maximum_percent         = 200
@@ -53,25 +53,25 @@ resource "aws_ecs_service" "main" {
 
 # NOTE: Takes a map of KEY = value and turns it into a list of: { name: KEY, value: value }.
 data "null_data_source" "environment" {
-  count = "${var.task_definition_environment_count}"
+  count = "${var.task_container_environment_count}"
 
   inputs = {
-    name  = "${element(keys(var.task_definition_environment), count.index)}"
-    value = "${element(values(var.task_definition_environment), count.index)}"
+    name  = "${element(keys(var.task_container_environment), count.index)}"
+    value = "${element(values(var.task_container_environment), count.index)}"
   }
 }
 
 # NOTE: HostPort must be 0 to use dynamic port mapping.
-resource "aws_ecs_task_definition" "main" {
+resource "aws_ecs_task_container" "main" {
   family        = "${var.name_prefix}"
   task_role_arn = "${aws_iam_role.task.arn}"
 
   container_definitions = <<EOF
 [{
     "name": "${var.name_prefix}",
-    "image": "${var.task_definition_image}",
-    "cpu": ${var.task_definition_cpu},
-    "memoryReservation": ${var.task_definition_memory_reservation},
+    "image": "${var.task_container_image}",
+    "cpu": ${var.task_container_cpu},
+    "memoryReservation": ${var.task_container_memory_reservation},
     "essential": true,
     "portMappings": [{
       "HostPort": 0,
@@ -85,7 +85,7 @@ resource "aws_ecs_task_definition" "main" {
             "awslogs-stream-prefix": "container"
         }
     },
-    "command": ${jsonencode(var.task_definition_command)},
+    "command": ${jsonencode(var.task_container_command)},
     "environment": ${jsonencode(data.null_data_source.environment.*.outputs)}
 }]
 EOF

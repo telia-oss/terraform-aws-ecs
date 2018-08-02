@@ -27,43 +27,43 @@ variable "health" {
   type        = "map"
 }
 
+variable "health_check_grace_period" {
+  description = "Seconds to ignore failing load balancer health checks on newly instantiated tasks to prevent premature shutdown, up to 7200."
+  default     = "0"
+}
+
 variable "desired_count" {
   description = "The number of instances of the task definition to place and keep running."
   default     = "1"
 }
 
-variable "task_definition_image" {
+variable "task_container_image" {
   description = "The image used to start a container."
 }
 
-variable "task_definition_cpu" {
+variable "task_container_cpu" {
   description = "The number of cpu units reserved for the container."
   default     = "256"
 }
 
-variable "task_definition_memory_reservation" {
+variable "task_container_memory_reservation" {
   description = "The soft limit (in MiB) of memory to reserve for the container."
   default     = "512"
 }
 
-variable "task_definition_command" {
+variable "task_container_command" {
   description = "The command that is passed to the container."
   default     = []
 }
 
-variable "task_definition_environment" {
+variable "task_container_environment" {
   description = "The environment variables to pass to a container."
   default     = {}
 }
 
-variable "task_definition_environment_count" {
+variable "task_container_environment_count" {
   description = "NOTE: This exists purely to calculate count in Terraform. Should equal the length of your environment map."
   default     = 0
-}
-
-variable "task_definition_health_check_grace_period" {
-  description = "Seconds to ignore failing load balancer health checks on newly instantiated tasks to prevent premature shutdown, up to 7200."
-  default     = "0"
 }
 
 variable "tags" {
