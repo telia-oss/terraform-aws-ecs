@@ -31,7 +31,7 @@ resource "aws_ecs_service" "main" {
   depends_on                        = ["data.aws_lb_target_group.default", "aws_iam_role_policy.service_permissions"]
   name                              = "${var.name_prefix}"
   cluster                           = "${var.cluster_id}"
-  task_container                    = "${aws_ecs_task_container.main.arn}"
+  task_definition                   = "${aws_ecs_task_definition.main.arn}"
   desired_count                     = "${var.desired_count}"
   iam_role                          = "${aws_iam_role.service.arn}"
   health_check_grace_period_seconds = "${var.health_check_grace_period}"
@@ -62,7 +62,7 @@ data "null_data_source" "environment" {
 }
 
 # NOTE: HostPort must be 0 to use dynamic port mapping.
-resource "aws_ecs_task_container" "main" {
+resource "aws_ecs_task_definition" "main" {
   family        = "${var.name_prefix}"
   task_role_arn = "${aws_iam_role.task.arn}"
 
