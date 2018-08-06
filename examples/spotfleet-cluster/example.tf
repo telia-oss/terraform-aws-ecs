@@ -12,11 +12,23 @@ data "aws_subnet_ids" "main" {
 data "aws_region" "current" {}
 
 data "aws_ami" "ecs" {
-  owners              = ["amazon"]
-  most_recent         = true
-  virtualization_type = "hvm"
-  architecture        = "x86_64"
-  root_device_type    = "ebs"
+  owners      = ["amazon"]
+  most_recent = true
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+
+  filter {
+    name   = "root-device-type"
+    values = ["ebs"]
+  }
 
   filter {
     name   = "name"
