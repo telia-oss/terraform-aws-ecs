@@ -143,6 +143,7 @@ module "application" {
   task_container_cpu                = "128"
   task_container_memory_reservation = "256"
   task_container_command            = []
+  task_container_environment_count  = 1
 
   task_container_environment = {
     "TEST" = "VALUE"
