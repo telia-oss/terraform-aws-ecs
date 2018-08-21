@@ -71,3 +71,8 @@ variable "tags" {
   type        = "map"
   default     = {}
 }
+
+variable "task_container_environment_count" {
+  description = "NOTE: This exists purely to calculate count in Terraform. Should equal the length of your environment map."
+  default     = 0
+}

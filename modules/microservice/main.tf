@@ -16,6 +16,7 @@ module "service" {
   task_container_environment        = "${var.task_container_environment}"
   health_check                      = "${var.health_check}"
   health_check_grace_period         = "${var.health_check_grace_period}"
+  task_container_environment_count  = "${var.task_container_environment_count}"
 
   target {
     protocol      = "${var.target["protocol"]}"
