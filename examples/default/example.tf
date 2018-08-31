@@ -1,5 +1,6 @@
 provider "aws" {
-  region = "eu-west-1"
+  version = ">= 1.33.0"
+  region  = "eu-west-1"
 }
 
 data "aws_vpc" "main" {
@@ -72,39 +73,6 @@ module "cluster" {
 }
 
 # ------------------------------------------------------------------------------
-# ecs/service: Create a service which responds with 404 as the default target
-# ------------------------------------------------------------------------------
-module "four_o_four" {
-  source = "../../modules/service"
-
-  name_prefix                       = "example-bouncer"
-  vpc_id                            = "${data.aws_vpc.main.id}"
-  cluster_id                        = "${module.cluster.id}"
-  cluster_role_name                 = "${module.cluster.role_name}"
-  desired_count                     = "1"
-  task_container_cpu                = "128"
-  task_container_memory_reservation = "256"
-  task_container_image              = "teliaoss/four-o-four:latest"
-
-  target {
-    protocol      = "HTTP"
-    port          = "8080"
-    load_balancer = "${module.alb.arn}"
-  }
-
-  health_check {
-    port    = "traffic-port"
-    path    = "/"
-    matcher = "404"
-  }
-
-  tags {
-    environment = "prod"
-    terraform   = "True"
-  }
-}
-
-# ------------------------------------------------------------------------------
 # Create a default listener and open ingress on port 80 (target group from above)
 # ------------------------------------------------------------------------------
 resource "aws_lb_listener" "main" {
@@ -113,8 +81,13 @@ resource "aws_lb_listener" "main" {
   protocol          = "HTTP"
 
   default_action {
-    target_group_arn = "${module.four_o_four.target_group_arn}"
-    type             = "forward"
+    type = "fixed-response"
+
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "not found"
+      status_code  = "404"
+    }
   }
 }
 
