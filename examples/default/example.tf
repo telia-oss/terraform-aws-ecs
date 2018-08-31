@@ -1,5 +1,6 @@
 provider "aws" {
-  region = "eu-west-1"
+  version = ">= 1.33.0"
+  region  = "eu-west-1"
 }
 
 data "aws_vpc" "main" {
