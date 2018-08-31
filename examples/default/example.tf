@@ -101,11 +101,11 @@ resource "aws_security_group_rule" "ingress_80" {
 }
 
 # ------------------------------------------------------------------------------
-# ecs/microservice: Creates a listener rule, target group and ECS service
-# (any request to example.com/app/* will be sent to this service)
+# ecs/service: Creates the ECS service and target group, listener rule has to be
+# added. (any request to example.com/app/* will be sent to this service)
 # ------------------------------------------------------------------------------
 module "application" {
-  source = "../../modules/microservice"
+  source = "../../modules/service"
 
   name_prefix                       = "example-app"
   vpc_id                            = "${data.aws_vpc.main.id}"
@@ -120,13 +120,6 @@ module "application" {
 
   task_container_environment = {
     "TEST" = "VALUE"
-  }
-
-  listener_rule {
-    listener_arn = "${aws_lb_listener.main.arn}"
-    priority     = 90
-    pattern      = "path"
-    values       = "/app/*"
   }
 
   target {
@@ -144,6 +137,21 @@ module "application" {
   tags {
     environment = "prod"
     terraform   = "True"
+  }
+}
+
+resource "aws_lb_listener_rule" "application" {
+  listener_arn = "${aws_lb_listener.main.arn}"
+  priority     = "90"
+
+  action {
+    type             = "forward"
+    target_group_arn = "${module.application.target_group_arn}"
+  }
+
+  condition {
+    field  = "path-pattern"
+    values = ["/app/*"]
   }
 }
 
@@ -165,8 +173,4 @@ data "aws_iam_policy_document" "privileges" {
       "*",
     ]
   }
-}
-
-output "ami" {
-  value = "${data.aws_ami.ecs.id}"
 }
