@@ -6,5 +6,4 @@ A collection of ECS modules for launching a cluster and registering services. In
 
 - [cluster](modules/cluster/README.md)
 - [service](modules/service/README.md)
-- [microservice](modules/microservice/README.md)
 - [spotfleet-cluster](modules/spotfleet-cluster/README.md)
