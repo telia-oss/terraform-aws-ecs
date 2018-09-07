@@ -7,7 +7,7 @@ output "id" {
 }
 
 output "role_id" {
-  description = "The name of the instance role."
+  description = "The id of the instance role."
   value       = "${module.spotfleet.role_id}"
 }
 
@@ -17,6 +17,6 @@ output "role_arn" {
 }
 
 output "security_group_id" {
-  description = "The name of the security group."
+  description = "The id of the security group."
   value       = "${module.spotfleet.security_group_id}"
 }

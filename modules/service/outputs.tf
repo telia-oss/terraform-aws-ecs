@@ -16,9 +16,9 @@ output "service_role_arn" {
   value       = "${aws_iam_role.service.arn}"
 }
 
-output "service_role_name" {
-  description = "The name of the service role."
-  value       = "${aws_iam_role.service.name}"
+output "service_role_id" {
+  description = "The id of the service role."
+  value       = "${aws_iam_role.service.id}"
 }
 
 output "task_role_arn" {
