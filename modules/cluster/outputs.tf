@@ -11,9 +11,9 @@ output "asg_id" {
   value       = "${module.asg.id}"
 }
 
-output "role_name" {
+output "role_id" {
   description = "The name of the instance role."
-  value       = "${module.asg.role_name}"
+  value       = "${module.asg.role_id}"
 }
 
 output "role_arn" {
