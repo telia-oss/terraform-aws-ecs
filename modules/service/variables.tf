@@ -66,6 +66,11 @@ variable "task_container_environment_count" {
   default     = 0
 }
 
+variable "networkMode" {
+  description = "Network mode for container. Bridge, host or awsvpc"
+  default     = "bridge"
+}
+
 variable "tags" {
   description = "A map of tags (key-value pairs) passed to resources."
   type        = "map"
