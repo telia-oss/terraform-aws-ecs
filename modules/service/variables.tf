@@ -66,7 +66,7 @@ variable "task_container_environment_count" {
   default     = 0
 }
 
-variable "network_mode" {
+variable "networkMode" {
   description = "Network mode for container. Bridge, host or awsvpc"
   default     = "bridge"
 }
