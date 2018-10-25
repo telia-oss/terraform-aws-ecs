@@ -36,7 +36,7 @@ variable "instance_key" {
 
 variable "instance_volume_size" {
   description = "The size of the volume in gigabytes."
-  default     = "8"
+  default     = "30"
 }
 
 variable "docker_volume_size" {
