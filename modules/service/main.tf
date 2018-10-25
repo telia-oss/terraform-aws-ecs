@@ -72,7 +72,9 @@ resource "aws_ecs_task_definition" "main" {
     "image": "${var.task_container_image}",
     "cpu": ${var.task_container_cpu},
     "memoryReservation": ${var.task_container_memory_reservation},
-    "networkMode" : "${var.networkMode}""
+    "networkConfiguration": {
+       "networkMode" : "${var.network_mode}"
+    }
     "essential": true,
     "portMappings": [{
       "HostPort": 0,
