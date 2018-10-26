@@ -21,7 +21,7 @@ output "role_arn" {
   value       = "${module.asg.role_arn}"
 }
 
-output "asg_security_group_id" {
+output "security_group_id" {
   description = "The security group ID of the auto scaling group."
   value       = "${module.asg.security_group_id}"
 }
