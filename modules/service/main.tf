@@ -118,13 +118,3 @@ resource "aws_iam_role_policy" "log_agent" {
   role   = "${var.cluster_role_name}"
   policy = "${data.aws_iam_policy_document.task_log.json}"
 }
-
-resource "aws_security_group_rule" "ingress" {
-  count                    = "${var.load_balancer_count}"
-  security_group_id        = "${module.asg.security_group_id}"
-  type                     = "ingress"
-  protocol                 = "tcp"
-  from_port                = "32768"
-  to_port                  = "65535"
-  source_security_group_id = "${element(var.load_balancers, count.index)}"
-}
