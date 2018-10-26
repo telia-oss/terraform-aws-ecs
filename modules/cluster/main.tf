@@ -71,9 +71,7 @@ data "aws_iam_policy_document" "permissions" {
 }
 
 module "asg" {
-  source  = "telia-oss/asg/aws"
-  version = "0.2.0"
-
+  source  = "github.com/telia-oss/terraform-aws-asg?ref=fcd5617"
   name_prefix          = "${var.name_prefix}-cluster"
   user_data            = "${coalesce(var.user_data, data.template_file.main.rendered)}"
   vpc_id               = "${var.vpc_id}"
@@ -88,14 +86,7 @@ module "asg" {
   instance_ami         = "${var.instance_ami}"
   instance_key         = "${var.instance_key}"
   instance_volume_size = "${var.instance_volume_size}"
-
-  ebs_block_devices = [{
-    device_name           = "/dev/xvdcz"
-    volume_type           = "gp2"
-    volume_size           = "${var.docker_volume_size}"
-    delete_on_termination = true
-  }]
-
+  ebs_block_devices    = "${var.ebs_block_devices}"
   tags = "${var.tags}"
 }
 
