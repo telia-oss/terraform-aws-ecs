@@ -36,7 +36,7 @@ variable "instance_key" {
 
 variable "instance_volume_size" {
   description = "The size of the volume in gigabytes."
-  default     = ""
+  default     = "30"
 }
 
 variable "ebs_block_devices" {

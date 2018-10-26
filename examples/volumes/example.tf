@@ -63,9 +63,18 @@ module "cluster" {
   subnet_ids           = ["${data.aws_subnet_ids.main.ids}"]
   instance_ami         = "${data.aws_ami.ecs.id}"
   instance_volume_size = "10"
-  docker_volume_size   = "30"
-  load_balancers       = ["${module.alb.security_group_id}"]
-  load_balancer_count  = 1
+
+  ebs_block_devices = [
+    {
+      device_name           = "/dev/xvdcz"
+      volume_type           = "gp2"
+      volume_size           = "30"
+      delete_on_termination = true
+    },
+  ]
+
+  load_balancers      = ["${module.alb.security_group_id}"]
+  load_balancer_count = 1
 
   tags {
     environment = "prod"
