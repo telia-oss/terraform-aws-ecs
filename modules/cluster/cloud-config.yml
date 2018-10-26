@@ -2,7 +2,7 @@
 package_update: true
 packages:
   - aws-cfn-bootstrap
-  - unzip
+  - aws-logs
 write_files:
   - path: "/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json"
     permissions: "0644"
@@ -101,12 +101,9 @@ runcmd:
   - |
     yum install -y https://amazon-ssm-${region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
   - |
-    mkdir -p /tmp/cloudwatchagent && cd /tmp/cloudwatchagent
-    curl -O https://s3.amazonaws.com/amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip
-    unzip AmazonCloudWatchAgent.zip && ./install.sh
-    rm -rf /tmp/cloudwatchagent
-    start amazon-cloudwatch-agent
+    systemctl enable awslogsd.service
+    systemctl start awslogsd
   - |
-    start ecs
+    systemctl ecs restart
     /usr/local/scripts/cloudformation-signal.sh
     /opt/aws/bin/cfn-signal -e $? --stack ${stack_name} --resource AutoScalingGroup --region ${region}
