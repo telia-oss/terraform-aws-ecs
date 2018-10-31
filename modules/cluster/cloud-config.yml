@@ -80,23 +80,6 @@ write_files:
       ECS_ENABLE_TASK_IAM_ROLE_NETWORK_HOST=true
       ECS_AVAILABLE_LOGGING_DRIVERS=["awslogs"]
 
-  - path: "/usr/local/scripts/cloudformation-signal.sh"
-    permissions: "0744"
-    owner: "root"
-    content: |
-      #! /bin/bash
-
-      set -euo pipefail
-
-      function await_process() {
-        echo -n "Waiting for $1..."
-        while ! pgrep -f "$1" > /dev/null; do
-          sleep 1
-        done
-        echo "Done!"
-      }
-      await_process "/usr/libexec/amazon-ecs-init start"
-
 runcmd:
   - |
     yum install -y https://amazon-ssm-${region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
@@ -105,5 +88,5 @@ runcmd:
     systemctl start awslogsd
   - |
     systemctl ecs restart
-    /usr/local/scripts/cloudformation-signal.sh
+    aws ecs wait services-stable --cluster ${ecs_cluster_name}
     /opt/aws/bin/cfn-signal -e $? --stack ${stack_name} --resource AutoScalingGroup --region ${region}
