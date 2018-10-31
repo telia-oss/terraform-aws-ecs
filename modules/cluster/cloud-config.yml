@@ -80,6 +80,26 @@ write_files:
       ECS_ENABLE_TASK_IAM_ROLE_NETWORK_HOST=true
       ECS_AVAILABLE_LOGGING_DRIVERS=["awslogs"]
 
+  - path: "/usr/local/scripts/cloudformation-signal.sh"
+    permissions: "0744"
+    owner: "root"
+    content: |
+      #! /bin/bash
+      INSTANCE_ID=$(curl http://169.254.169.254/latest/meta-data/instance-id)
+
+      set -euo pipefail
+
+      function await_process() {
+        CHECK_ACTIVE=$(aws ecs list-container-instances --cluster ${ecs_cluster_name} --filter ACTIVE --filter ec2InstanceId==$INSTANCE_ID | grep aws)
+        echo -n "Waiting for Instance to be active"
+        while  -z $CHECK_ACTIVE; do
+          sleep 1
+          CHECK_ACTIVE=$(aws ecs list-container-instances --cluster ${ecs_cluster_name} --filter ACTIVE --filter ec2InstanceId==$INSTANCE_ID | grep aws)
+        done
+        echo "Done!"
+      }
+      await_process "/usr/libexec/amazon-ecs-init start"
+
 runcmd:
   - |
     yum install -y https://amazon-ssm-${region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
@@ -88,5 +108,5 @@ runcmd:
     systemctl start awslogsd
   - |
     systemctl ecs restart
-    aws ecs wait services-stable --cluster ${ecs_cluster_name}
+    /usr/local/scripts/cloudformation-signal.sh
     /opt/aws/bin/cfn-signal -e $? --stack ${stack_name} --resource AutoScalingGroup --region ${region}
