@@ -102,11 +102,13 @@ write_files:
 
 runcmd:
   - |
-    yum install -y https://amazon-ssm-${region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+    yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+    curl -O https://bootstrap.pypa.io/get-pip.py
+    python get-pip.py --user
+    pip install awscli --upgrade --user
   - |
     systemctl enable awslogsd.service
     systemctl start awslogsd
   - |
-    systemctl ecs restart
     /usr/local/scripts/cloudformation-signal.sh
     /opt/aws/bin/cfn-signal -e $? --stack ${stack_name} --resource AutoScalingGroup --region ${region}
