@@ -2,7 +2,7 @@
 package_update: true
 packages:
 - aws-cfn-bootstrap
-- aws-logs
+- awslogs
 write_files:
 - path: "/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json"
   permissions: "0644"
@@ -90,11 +90,11 @@ write_files:
     set -euo pipefail
 
     function await_process() {
-      CHECK_ACTIVE=$(aws ecs list-container-instances --cluster ${ecs_cluster_name} --filter ACTIVE --filter ec2InstanceId==$INSTANCE_ID | grep aws)
+      CHECK_ACTIVE=$(aws --region ${region} ecs list-container-instances --cluster ${ecs_cluster_name} --filter ACTIVE --filter ec2InstanceId==$INSTANCE_ID | grep aws)
       echo -n "Waiting for Instance to be active"
       while  -z $CHECK_ACTIVE; do
         sleep 1
-        CHECK_ACTIVE=$(aws ecs list-container-instances --cluster ${ecs_cluster_name} --filter ACTIVE --filter ec2InstanceId==$INSTANCE_ID | grep aws)
+        CHECK_ACTIVE=$(aws --region ${region} ecs list-container-instances --cluster ${ecs_cluster_name} --filter ACTIVE --filter ec2InstanceId==$INSTANCE_ID | grep aws)
       done
       echo "Done!"
     }
@@ -105,6 +105,7 @@ runcmd:
   yum install -y https://s3.dualstack.${region}.amazonaws.com/amazon-ssm-${region}/latest/linux_amd64/amazon-ssm-agent.rpm
   curl -O https://bootstrap.pypa.io/get-pip.py
   python get-pip.py --user
+  export PATH=~/.local/bin:$PATH
   pip install awscli --upgrade --user
   systemctl enable awslogsd.service
   systemctl start awslogsd
