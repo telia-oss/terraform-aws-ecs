@@ -41,6 +41,7 @@ data "aws_iam_policy_document" "permissions" {
       "ecs:CreateCluster",
       "ecs:DeregisterContainerInstance",
       "ecs:DiscoverPollEndpoint",
+      "ecs:ListContainerInstances",
       "ecs:Poll",
       "ecs:RegisterContainerInstance",
       "ecs:StartTelemetrySession",
