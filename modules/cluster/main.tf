@@ -72,8 +72,7 @@ data "aws_iam_policy_document" "permissions" {
 }
 
 module "asg" {
-  source               = "telia-oss/asg/aws"
-  version              = "0.2.1"
+  source               = "github.com/telia-oss/terraform-aws-asg?ref=4a396cc"
   name_prefix          = "${var.name_prefix}-cluster"
   user_data            = "${coalesce(var.user_data, data.template_file.main.rendered)}"
   vpc_id               = "${var.vpc_id}"
