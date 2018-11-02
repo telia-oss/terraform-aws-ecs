@@ -1,114 +1,112 @@
 #cloud-config
 package_update: true
 packages:
-  - aws-cfn-bootstrap
-  - aws-logs
+- aws-cfn-bootstrap
+- aws-logs
 write_files:
-  - path: "/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json"
-    permissions: "0644"
-    owner: "root"
-    content: |
-      {
-          "agent": {
-              "region": "${region}",
-              "metrics_collection_interval": 60,
-              "logfile": "/opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log"
-          },
-          "metrics": {
-              "metrics_collected": {
-                  "disk": {
-                      "resources": [
-                          "*"
-                      ],
-                      "measurement": [
-                          "disk_used_percent"
-                      ],
-                      "metrics_collection_interval": 60
-                  },
-                  "swap": {
-                      "measurement": [
-                          "swap_used_percent"
-                      ],
-                      "metrics_collection_interval": 5
-                  },
-                  "mem": {
-                      "measurement": [
-                          "mem_used_percent"
-                      ],
-                      "metrics_collection_interval": 5
-                  }
-              },
-              "append_dimensions": {
-                  "ImageId": "$${aws:ImageId}",
-                  "InstanceId": "$${aws:InstanceId}",
-                  "InstanceType": "$${aws:InstanceType}",
-                  "AutoScalingGroupName": "$${aws:AutoScalingGroupName}"
-              },
-              "aggregation_dimensions": [["InstanceId"], ["AutoScalingGroupName"]]
-          },
-          "logs": {
-              "logs_collected": {
-                  "files": {
-                      "collect_list": [
-                          {
-                              "file_path": "/opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log*",
-                              "log_group_name": "${log_group_name}",
-                              "log_stream_name": "{instance_id}/amazon-cloudwatch-agent",
-                              "timezone": "UTC"
-                          },
-                          {
-                              "file_path": "/var/log/ecs/ecs-agent.log*",
-                              "log_group_name": "${log_group_name}",
-                              "log_stream_name": "{instance_id}/amazon-ecs-agent",
-                              "timezone": "UTC"
-                          }
-                      ]
-                  }
-              },
-              "log_stream_name": "{instance_id}/untitled-logs"
-          }
-      }
+- path: "/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json"
+  permissions: "0644"
+  owner: "root"
+  content: |
+    {
+        "agent": {
+            "region": "${region}",
+            "metrics_collection_interval": 60,
+            "logfile": "/opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log"
+        },
+        "metrics": {
+            "metrics_collected": {
+                "disk": {
+                    "resources": [
+                        "*"
+                    ],
+                    "measurement": [
+                        "disk_used_percent"
+                    ],
+                    "metrics_collection_interval": 60
+                },
+                "swap": {
+                    "measurement": [
+                        "swap_used_percent"
+                    ],
+                    "metrics_collection_interval": 5
+                },
+                "mem": {
+                    "measurement": [
+                        "mem_used_percent"
+                    ],
+                    "metrics_collection_interval": 5
+                }
+            },
+            "append_dimensions": {
+                "ImageId": "$${aws:ImageId}",
+                "InstanceId": "$${aws:InstanceId}",
+                "InstanceType": "$${aws:InstanceType}",
+                "AutoScalingGroupName": "$${aws:AutoScalingGroupName}"
+            },
+            "aggregation_dimensions": [["InstanceId"], ["AutoScalingGroupName"]]
+        },
+        "logs": {
+            "logs_collected": {
+                "files": {
+                    "collect_list": [
+                        {
+                            "file_path": "/opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log*",
+                            "log_group_name": "${log_group_name}",
+                            "log_stream_name": "{instance_id}/amazon-cloudwatch-agent",
+                            "timezone": "UTC"
+                        },
+                        {
+                            "file_path": "/var/log/ecs/ecs-agent.log*",
+                            "log_group_name": "${log_group_name}",
+                            "log_stream_name": "{instance_id}/amazon-ecs-agent",
+                            "timezone": "UTC"
+                        }
+                    ]
+                }
+            },
+            "log_stream_name": "{instance_id}/untitled-logs"
+        }
+    }
 
-  - path: "/etc/ecs/ecs.config"
-    permissions: "0744"
-    owner: "root"
-    content: |
-      ECS_CLUSTER=${ecs_cluster_name}
-      ECS_LOG_LEVEL=${ecs_log_level}
-      ECS_ENABLE_CONTAINER_METADATA=true
-      ECS_ENABLE_TASK_IAM_ROLE=true
-      ECS_ENABLE_TASK_IAM_ROLE_NETWORK_HOST=true
-      ECS_AVAILABLE_LOGGING_DRIVERS=["awslogs"]
+- path: "/etc/ecs/ecs.config"
+  permissions: "0744"
+  owner: "root"
+  content: |
+    ECS_CLUSTER=${ecs_cluster_name}
+    ECS_LOG_LEVEL=${ecs_log_level}
+    ECS_ENABLE_CONTAINER_METADATA=true
+    ECS_ENABLE_TASK_IAM_ROLE=true
+    ECS_ENABLE_TASK_IAM_ROLE_NETWORK_HOST=true
+    ECS_AVAILABLE_LOGGING_DRIVERS=["awslogs"]
 
-  - path: "/usr/local/scripts/cloudformation-signal.sh"
-    permissions: "0744"
-    owner: "root"
-    content: |
-      #! /bin/bash
-      INSTANCE_ID=$(curl http://169.254.169.254/latest/meta-data/instance-id)
+- path: "/usr/local/scripts/cloudformation-signal.sh"
+  permissions: "0744"
+  owner: "root"
+  content: |
+    #! /bin/bash
+    INSTANCE_ID=$(curl http://169.254.169.254/latest/meta-data/instance-id)
 
-      set -euo pipefail
+    set -euo pipefail
 
-      function await_process() {
+    function await_process() {
+      CHECK_ACTIVE=$(aws ecs list-container-instances --cluster ${ecs_cluster_name} --filter ACTIVE --filter ec2InstanceId==$INSTANCE_ID | grep aws)
+      echo -n "Waiting for Instance to be active"
+      while  -z $CHECK_ACTIVE; do
+        sleep 1
         CHECK_ACTIVE=$(aws ecs list-container-instances --cluster ${ecs_cluster_name} --filter ACTIVE --filter ec2InstanceId==$INSTANCE_ID | grep aws)
-        echo -n "Waiting for Instance to be active"
-        while  -z $CHECK_ACTIVE; do
-          sleep 1
-          CHECK_ACTIVE=$(aws ecs list-container-instances --cluster ${ecs_cluster_name} --filter ACTIVE --filter ec2InstanceId==$INSTANCE_ID | grep aws)
-        done
-        echo "Done!"
-      }
-      await_process "/usr/libexec/amazon-ecs-init start"
+      done
+      echo "Done!"
+    }
+    await_process "/usr/libexec/amazon-ecs-init start"
 
 runcmd:
-  - |
-    yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
-    curl -O https://bootstrap.pypa.io/get-pip.py
-    python get-pip.py --user
-    pip install awscli --upgrade --user
-  - |
-    systemctl enable awslogsd.service
-    systemctl start awslogsd
-  - |
-    /usr/local/scripts/cloudformation-signal.sh
-    /opt/aws/bin/cfn-signal -e $? --stack ${stack_name} --resource AutoScalingGroup --region ${region}
+- |
+  yum install -y https://s3.dualstack.${region}.amazonaws.com/amazon-ssm-${region}/latest/linux_amd64/amazon-ssm-agent.rpm
+  curl -O https://bootstrap.pypa.io/get-pip.py
+  python get-pip.py --user
+  pip install awscli --upgrade --user
+  systemctl enable awslogsd.service
+  systemctl start awslogsd
+  /usr/local/scripts/cloudformation-signal.sh
+  /opt/aws/bin/cfn-signal -e $? --stack ${stack_name} --resource AutoScalingGroup --region ${region}
