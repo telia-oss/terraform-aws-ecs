@@ -101,12 +101,11 @@ write_files:
     await_process
 
 runcmd:
- - [ yum, install, -y, "https://s3.dualstack.${region}.amazonaws.com/amazon-ssm-${region}/latest/linux_amd64/amazon-ssm-agent.rpm"]
- - [ curl, -O, "https://bootstrap.pypa.io/get-pip.py" ]
- - [ sh, -c, "python get-pip.py --user" ]
- - [ sh, -c, "export PATH=~/.local/bin:$PATH" ]
- - [ sh, -c, "pip install awscli --upgrade --user" ]
- - [ systemctl, enable, awslogsd.service ]
- - [ systemctl start awslogsd ]
- - [ sh, -c, /usr/local/scripts/cloudformation-signal.sh ]
- - [ sh, -c, "/opt/aws/bin/cfn-signal -e $? --stack ${stack_name} --resource AutoScalingGroup --region ${region}" ]
+- |
+  yum install -y https://s3.dualstack.${region}.amazonaws.com/amazon-ssm-${region}/latest/linux_amd64/amazon-ssm-agent.rpm
+  curl -O https://bootstrap.pypa.io/get-pip.py
+  python get-pip.py --user
+  export PATH=~/.local/bin:$PATH
+  pip install awscli --upgrade --user
+  systemctl enable awslogsd.service
+  systemctl start awslogsd
