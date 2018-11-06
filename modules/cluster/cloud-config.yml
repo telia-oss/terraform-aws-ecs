@@ -85,10 +85,8 @@ write_files:
   owner: "root"
   content: |
     #! /bin/bash
+    set -uo pipefail
     INSTANCE_ID=$(curl http://169.254.169.254/latest/meta-data/instance-id)
-    echo $INSTANCE_ID > /usr/local/scripts/debug.txt
-    set -euo pipefail
-
     function await_process() {
       CHECK_ACTIVE=$(aws --region ${region} ecs list-container-instances --cluster ${ecs_cluster_name} --status ACTIVE --filter ec2InstanceId==$INSTANCE_ID | grep 'arn:aws:ecs')
       echo $CHECK_ACTIVE >> /usr/local/scripts/debug.txt
@@ -96,7 +94,6 @@ write_files:
       while [ -z $CHECK_ACTIVE ]; do
         sleep 1
         CHECK_ACTIVE=$(aws --region ${region} ecs list-container-instances --cluster ${ecs_cluster_name} --status ACTIVE --filter ec2InstanceId==$INSTANCE_ID | grep 'arn:aws:ecs')
-        echo $CHECK_ACTIVE >> /usr/local/scripts/debug.txt
       done
       echo "Done!"
     }
