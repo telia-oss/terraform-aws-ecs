@@ -96,7 +96,7 @@ write_files:
       done
       echo "Done!"
     }
-    await_process
+    await_process "/usr/libexec/amazon-ecs-init start"
 
 runcmd:
 - |
