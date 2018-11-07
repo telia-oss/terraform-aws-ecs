@@ -96,7 +96,7 @@ write_files:
       done
       echo "Done!"
     }
-    await_process "/usr/libexec/amazon-ecs-init start"
+    await_process
 
 runcmd:
 - |
@@ -107,5 +107,6 @@ runcmd:
   pip install awscli --upgrade --user
   systemctl enable awslogsd.service
   systemctl start awslogsd
+  /usr/libexec/amazon-ecs-init start
   /usr/local/scripts/cloudformation-signal.sh
   /opt/aws/bin/cfn-signal -e $? --stack ${stack_name} --resource AutoScalingGroup --region ${region}
