@@ -87,7 +87,7 @@ write_files:
     #! /bin/bash
     set -uo pipefail
     INSTANCE_ID=$(curl http://169.254.169.254/latest/meta-data/instance-id)
-    echo -n "Waiting for Instance $INSTANCE_ID to be ACTIVE in cluster ${ecs_cluser_name}"
+    echo -n "Waiting for Instance $INSTANCE_ID to be ACTIVE in cluster ${ecs_cluster_name}"
     function await_process() {
       CHECK_ACTIVE=$(aws --region ${region} ecs list-container-instances --cluster ${ecs_cluster_name} --status ACTIVE --filter ec2InstanceId==$INSTANCE_ID | grep 'arn:aws:ecs')
       while [ -z $CHECK_ACTIVE ]; do
