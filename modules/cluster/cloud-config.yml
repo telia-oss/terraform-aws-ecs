@@ -95,6 +95,7 @@ write_files:
         CHECK_ACTIVE=$(aws --region ${region} ecs list-container-instances --cluster ${ecs_cluster_name} --status ACTIVE --filter ec2InstanceId==$INSTANCE_ID | grep 'arn:aws:ecs')
       done
       echo "Done!"
+      /opt/aws/bin/cfn-signal -e $? --stack ${stack_name} --resource AutoScalingGroup --region ${region}
     }
     await_process
 
@@ -107,4 +108,4 @@ runcmd:
   pip install awscli --upgrade --user
   systemctl enable awslogsd.service
   systemctl start awslogsd
-  /opt/aws/bin/cfn-signal -e $? --stack ${stack_name} --resource AutoScalingGroup --region ${region}
+  /usr/local/scripts/cloudformation-signal.sh > /dev/null 2>&1 &
