@@ -89,10 +89,13 @@ write_files:
     INSTANCE_ID=$(curl http://169.254.169.254/latest/meta-data/instance-id)
     echo -n "Waiting for Instance $INSTANCE_ID to be ACTIVE in cluster ${ecs_cluster_name}"
     function await_process() {
-      CHECK_ACTIVE=$(aws --region ${region} ecs list-container-instances --cluster ${ecs_cluster_name} --status ACTIVE --filter ec2InstanceId==$INSTANCE_ID | grep 'arn:aws:ecs')
+      CHECK_ACTIVE=""
       while [ -z $CHECK_ACTIVE ]; do
         sleep 1
         CHECK_ACTIVE=$(aws --region ${region} ecs list-container-instances --cluster ${ecs_cluster_name} --status ACTIVE --filter ec2InstanceId==$INSTANCE_ID | grep 'arn:aws:ecs')
+        if [ -z $CHECK_ACTIVE ]; then
+          sleep 1
+        fi
       done
       echo "Done!"
       /opt/aws/bin/cfn-signal -e $? --stack ${stack_name} --resource AutoScalingGroup --region ${region}
@@ -108,4 +111,4 @@ runcmd:
   pip install awscli --upgrade --user
   systemctl enable awslogsd.service
   systemctl start awslogsd
-  /usr/local/scripts/cloudformation-signal.sh > /dev/null 2>&1 &
+  /usr/local/scripts/cloudformation-signal.sh &
