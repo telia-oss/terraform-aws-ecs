@@ -26,7 +26,7 @@ variable "instance_type" {
 }
 
 variable "instance_ami" {
-  description = "The EC2 (ECS optimizied) image ID to launch."
+  description = "The EC2 Amazon Linux 2 (ECS optimizied) image ID to launch."
 }
 
 variable "instance_key" {

@@ -1,5 +1,5 @@
 variable "instance_ami" {
-  description = "The EC2 (ECS optimizied) image ID to launch."
+  description = "The EC2 Amazon Linux 2 (ECS optimizied) image ID to launch."
 }
 
 variable "name_prefix" {
