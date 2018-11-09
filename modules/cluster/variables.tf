@@ -26,7 +26,7 @@ variable "instance_type" {
 }
 
 variable "instance_ami" {
-  description = "The EC2 (ECS optimizied) image ID to launch."
+  description = "The EC2 Amazon Linux 2 (ECS optimizied) image ID to launch."
 }
 
 variable "instance_key" {
@@ -36,12 +36,13 @@ variable "instance_key" {
 
 variable "instance_volume_size" {
   description = "The size of the volume in gigabytes."
-  default     = "8"
+  default     = "30"
 }
 
-variable "docker_volume_size" {
-  description = "The size of the docker volume (/dev/xvdcz) in gigabytes."
-  default     = "22"
+variable "ebs_block_devices" {
+  description = "Additional EBS block devices to attach to the instance."
+  type        = "list"
+  default     = []
 }
 
 variable "min_size" {
