@@ -2,7 +2,6 @@
 package_update: true
 packages:
 - aws-cfn-bootstrap
-- awslogs
 write_files:
 - path: "/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json"
   permissions: "0644"
@@ -85,14 +84,14 @@ write_files:
   owner: "root"
   content: |
     #! /bin/bash
-    set -uo pipefail
+    set -euo pipefail
     INSTANCE_ID=$(curl http://169.254.169.254/latest/meta-data/instance-id)
     echo -n "Waiting for Instance $INSTANCE_ID to be ACTIVE in cluster ${ecs_cluster_name}"
     function await_process() {
       CHECK_ACTIVE=""
       while [ -z $CHECK_ACTIVE ]; do
         sleep 1
-        CHECK_ACTIVE=$(aws --region ${region} ecs list-container-instances --cluster ${ecs_cluster_name} --status ACTIVE --filter ec2InstanceId==$INSTANCE_ID | grep 'arn:aws:ecs')
+        CHECK_ACTIVE=$(aws --region ${region} ecs list-container-instances --cluster ${ecs_cluster_name} --status ACTIVE --filter ec2InstanceId==$INSTANCE_ID | grep 'arn:aws:ecs' || echo "")
         if [ -z $CHECK_ACTIVE ]; then
           sleep 1
         fi
@@ -109,6 +108,7 @@ runcmd:
   python get-pip.py --user
   export PATH=~/.local/bin:$PATH
   pip install awscli --upgrade --user
-  systemctl enable awslogsd.service
-  systemctl start awslogsd
+  curl -O https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm
+  rpm -U ./amazon-cloudwatch-agent.rpm
+  /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s
   /usr/local/scripts/cloudformation-signal.sh &
