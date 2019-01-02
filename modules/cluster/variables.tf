@@ -61,8 +61,8 @@ variable "ecs_log_level" {
 }
 
 variable "retention_in_days" {
-  decription = "Log retention given in days."
-  default    = "0"
+  description = "Log retention given in days."
+  default     = "0"
 }
 
 variable "load_balancers" {
