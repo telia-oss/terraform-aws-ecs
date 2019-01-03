@@ -60,7 +60,7 @@ variable "ecs_log_level" {
   default     = "info"
 }
 
-variable "retention_in_days" {
+variable "log_retention_in_days" {
   description = "Log retention given in days."
   default     = "0"
 }

@@ -9,7 +9,7 @@ resource "aws_ecs_cluster" "main" {
 
 resource "aws_cloudwatch_log_group" "main" {
   name              = "${var.name_prefix}-cluster-instances"
-  retention_in_days = "${var.retention_in_days}"
+  retention_in_days = "${var.log_retention_in_days}"
 }
 
 data "template_file" "main" {
