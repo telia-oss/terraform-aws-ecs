@@ -60,6 +60,11 @@ variable "ecs_log_level" {
   default     = "info"
 }
 
+variable "log_retention_in_days" {
+  description = "Log retention given in days."
+  default     = "0"
+}
+
 variable "load_balancers" {
   description = "List of load balancer security groups that can ingress on the dynamic port range."
   type        = "list"
