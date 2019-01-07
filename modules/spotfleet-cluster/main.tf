@@ -14,7 +14,7 @@ data "template_file" "main" {
 
 module "spotfleet" {
   source  = "telia-oss/spotfleet/aws"
-  version = "0.1.0"
+  version = "0.1.1"
 
   name_prefix             = "${var.name_prefix}"
   pre_defined_spotrequest = "${var.pre-defined-spotrequest}"

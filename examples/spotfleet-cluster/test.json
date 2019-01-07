@@ -1,0 +1,16 @@
+{
+  "ActiveInstances": [
+    {
+      "InstanceId": "i-0694a3b47fdcc97af",
+      "InstanceType": "m3.medium",
+      "SpotInstanceRequestId": "sir-zb3r75fm",
+      "InstanceHealth": "healthy"
+    },
+    {
+      "InstanceId": "i-09c9ed66039b22888",
+      "InstanceType": "m3.medium",
+      "SpotInstanceRequestId": "sir-xh5i7pfm",
+      "InstanceHealth": "healthy"
+    }
+  ]
+}

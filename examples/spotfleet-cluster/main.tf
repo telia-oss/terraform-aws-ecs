@@ -43,14 +43,18 @@ data "aws_ami" "ecs" {
 module "spotfleet-cluster" {
   source              = "../../modules/spotfleet-cluster"
   target_capacity     = "2"
-  name_prefix         = "example"
+  name_prefix         = "spotfleet-cluster-test"
   vpc_id              = "${data.aws_vpc.main.id}"
   subnet_ids          = ["${data.aws_subnet_ids.main.ids}"]
   instance_ami        = "${data.aws_ami.ecs.id}"
   load_balancer_count = 0
 
   tags {
-    environment = "prod"
+    environment = "test"
     terraform   = "True"
   }
+}
+
+output "spotfleet_request_id" {
+  value = "${module.spotfleet-cluster.spotfleet_request_id}"
 }

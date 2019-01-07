@@ -1,0 +1,7 @@
+{
+    "spotfleet_request_id": {
+        "sensitive": false,
+        "type": "string",
+        "value": "sfr-6d2bfc1b-ca5e-4ff5-85ca-a0a4e82a5c53"
+    }
+}

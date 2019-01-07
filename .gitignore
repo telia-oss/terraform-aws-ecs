@@ -5,3 +5,6 @@ crash.log
 
 # InteliJ IDE
 .idea/
+
+# Mac Files
+.DS_Store

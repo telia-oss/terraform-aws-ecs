@@ -20,3 +20,8 @@ output "security_group_id" {
   description = "The name of the security group."
   value       = "${module.spotfleet.security_group_id}"
 }
+
+output "spotfleet_request_id" {
+  description = "The id of the spotfleet_request made to create the cluster"
+  value = "${module.spotfleet.request_id}"
+}
