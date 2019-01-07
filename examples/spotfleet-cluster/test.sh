@@ -17,7 +17,7 @@ tests_failed=0
 
 
 # Set spotfleet request target capacity to 0 and wait for instance to be terminated so that terraform destroy can complete
-spotfleet_request_id=`cat terraform-out.json | jq -r '.spotfleet_request_id.value'`
+spotfleet_request_id=`cat terraform-out/terraform-out.json | jq -r '.spotfleet_request_id.value'`
 instances=`aws ec2 describe-spot-fleet-instances --spot-fleet-request-id $spotfleet_request_id | jq '.ActiveInstances[].InstanceId' | jq -rs '. |join(" ")'`
 aws ec2 modify-spot-fleet-request --target-capacity 0 --spot-fleet-request-id $spotfleet_request_id
 aws ec2 wait instance-terminated --instance-ids $instances
