@@ -17,7 +17,7 @@ variable "vpc_id" {
 
 variable "subnet_ids" {
   description = "ID of subnets where instances can be provisioned."
-  type        = "list"
+  type        = list(string)
 }
 
 variable "instance_type" {
