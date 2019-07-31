@@ -110,7 +110,7 @@ module "application" {
   name_prefix                       = "example-app"
   vpc_id                            = data.aws_vpc.main.id
   cluster_id                        = module.cluster.id
-  cluster_role_name                 = module.cluster.role_namr
+  cluster_role_name                 = module.cluster.role_name
   desired_count                     = 1
   task_container_image              = "crccheck/hello-world:latest"
   task_container_cpu                = 128
