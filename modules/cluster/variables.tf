@@ -48,7 +48,7 @@ variable "instance_volume_size" {
 
 variable "ebs_block_devices" {
   description = "Additional EBS block devices to attach to the instance."
-  type        = list(string)
+  type        = list(map(string))
   default     = []
 }
 
