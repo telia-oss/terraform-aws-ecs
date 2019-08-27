@@ -12,9 +12,9 @@ data "aws_lb_target_group" "default" {
 }
 
 resource "aws_lb_target_group" "main" {
-  vpc_id       = var.vpc_id
-  protocol     = var.target["protocol"]
-  port         = var.target["port"]
+  vpc_id   = var.vpc_id
+  protocol = var.target["protocol"]
+  port     = var.target["port"]
 
   dynamic "health_check" {
     for_each = var.health_check
