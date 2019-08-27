@@ -57,7 +57,7 @@ data "aws_ami" "ecs" {
 }
 
 module "cluster" {
-  source = "./terraform-aws-ecs/modules/cluster"
+  source = "../../modules/cluster"
 
   name_prefix         = "example"
   vpc_id              = data.aws_vpc.main.id
@@ -122,14 +122,14 @@ module "application" {
     "TEST" = "VALUE"
   }
 
-  target {
+  target = {
     protocol      = "HTTP"
     port          = 8000
     load_balancer = module.alb.arn
   }
 
   health_check = [{
-    port    = "traffic-port"
+    port    = 80
     path    = "/"
     matcher = "200"
 
