@@ -28,7 +28,7 @@ variable "target" {
 
 variable "health_check" {
   description = "A health block containing health check settings for the target group. Overrides the defaults."
-  type        = list(map(string))
+  type        = map(string)
 }
 
 variable "health_check_grace_period" {

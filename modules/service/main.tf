@@ -16,19 +16,16 @@ resource "aws_lb_target_group" "main" {
   protocol = var.target["protocol"]
   port     = var.target["port"]
 
-  dynamic "health_check" {
-    for_each = var.health_check
-
-    content {
-      port                = lookup(health_check.value, "port", null)
-      protocol            = lookup(health_check.value, "protocol", null)
-      path                = lookup(health_check.value, "path", null)
-      matcher             = lookup(health_check.value, "matcher", null)
-      interval            = lookup(health_check.value, "interval", null)
-      timeout             = lookup(health_check.value, "timeout", null)
-      healthy_threshold   = lookup(health_check.value, "healthy_threshold", null)
-      unhealthy_threshold = lookup(health_check.value, "unhealthy_threshold", null)
-    }
+  health_check {
+    enabled             = lookup(var.health_check, "enabled", null)
+    interval            = lookup(var.health_check, "interval", null)
+    path                = lookup(var.health_check, "path", null)
+    port                = lookup(var.health_check, "port", null)
+    protocol            = lookup(var.health_check, "protocol", null)
+    timeout             = lookup(var.health_check, "timeout", null)
+    healthy_threshold   = lookup(var.health_check, "healthy_threshold", null)
+    unhealthy_threshold = lookup(var.health_check, "unhealthy_threshold", null)
+    matcher             = lookup(var.health_check, "matcher", null)
   }
 
   # NOTE: TF is unable to destroy a target group while a listener is attached,
