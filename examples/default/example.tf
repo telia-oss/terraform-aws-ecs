@@ -132,12 +132,6 @@ module "application" {
     port    = 80
     path    = "/"
     matcher = "200"
-
-    healthy_threshold   = null
-    interval            = null
-    protocol            = null
-    timeout             = null
-    unhealthy_threshold = null
   }]
 
   tags = {
