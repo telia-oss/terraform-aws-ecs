@@ -7,21 +7,21 @@ data "aws_vpc" "main" {
 }
 
 data "aws_subnet_ids" "main" {
-  vpc_id = "${data.aws_vpc.main.id}"
+  vpc_id = data.aws_vpc.main.id
 }
 
 data "aws_region" "current" {}
 
 module "alb" {
   source  = "telia-oss/loadbalancer/aws"
-  version = "0.1.0"
+  version = "v3.0.0"
 
   name_prefix = "example"
-  vpc_id      = "${data.aws_vpc.main.id}"
-  subnet_ids  = ["${data.aws_subnet_ids.main.ids}"]
+  vpc_id      = data.aws_vpc.main.id
+  subnet_ids  = data.aws_subnet_ids.main.ids
   type        = "application"
 
-  tags {
+  tags = {
     environment = "prod"
     terraform   = "True"
   }
@@ -59,9 +59,9 @@ module "cluster" {
   source = "../../modules/cluster"
 
   name_prefix          = "example"
-  vpc_id               = "${data.aws_vpc.main.id}"
-  subnet_ids           = ["${data.aws_subnet_ids.main.ids}"]
-  instance_ami         = "${data.aws_ami.ecs.id}"
+  vpc_id               = data.aws_vpc.main.id
+  subnet_ids           = data.aws_subnet_ids.main.ids
+  instance_ami         = data.aws_ami.ecs.id
   instance_volume_size = "10"
 
   ebs_block_devices = [
@@ -73,10 +73,10 @@ module "cluster" {
     },
   ]
 
-  load_balancers      = ["${module.alb.security_group_id}"]
+  load_balancers      = [module.alb.security_group_id]
   load_balancer_count = 1
 
-  tags {
+  tags = {
     environment = "prod"
     terraform   = "True"
   }

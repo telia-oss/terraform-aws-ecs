@@ -8,14 +8,28 @@ data "aws_region" "current" {}
 # (See https://github.com/hashicorp/terraform/issues/12634.)
 # Create a target group that references the real one and then depend on it in the aws_ecs_service definintion
 data "aws_lb_target_group" "default" {
-  arn = "${aws_lb_target_group.main.arn}"
+  arn = aws_lb_target_group.main.arn
 }
 
 resource "aws_lb_target_group" "main" {
-  vpc_id       = "${var.vpc_id}"
-  protocol     = "${var.target["protocol"]}"
-  port         = "${var.target["port"]}"
-  health_check = ["${var.health_check}"]
+  vpc_id   = var.vpc_id
+  protocol = var.target["protocol"]
+  port     = var.target["port"]
+
+  dynamic "health_check" {
+    for_each = var.health_check
+
+    content {
+      healthy_threshold   = health_check.value.healthy_threshold
+      interval            = health_check.value.interval
+      matcher             = health_check.value.matcher
+      path                = health_check.value.path
+      port                = health_check.value.port
+      protocol            = health_check.value.protocol
+      timeout             = health_check.value.timeout
+      unhealthy_threshold = health_check.value.unhealthy_threshold
+    }
+  }
 
   # NOTE: TF is unable to destroy a target group while a listener is attached,
   # therefor we have to create a new one before destroying the old. This also means
@@ -24,25 +38,25 @@ resource "aws_lb_target_group" "main" {
     create_before_destroy = true
   }
 
-  tags = "${merge(var.tags, map("Name", "${var.name_prefix}-target-${var.target["port"]}"))}"
+  tags = merge(var.tags, map("Name", "${var.name_prefix}-target-${var.target["port"]}"))
 }
 
 resource "aws_ecs_service" "main" {
   depends_on                        = ["data.aws_lb_target_group.default", "aws_iam_role_policy.service_permissions"]
-  name                              = "${var.name_prefix}"
-  cluster                           = "${var.cluster_id}"
-  task_definition                   = "${aws_ecs_task_definition.main.arn}"
-  desired_count                     = "${var.desired_count}"
-  iam_role                          = "${aws_iam_role.service.arn}"
-  health_check_grace_period_seconds = "${var.health_check_grace_period}"
+  name                              = var.name_prefix
+  cluster                           = var.cluster_id
+  task_definition                   = aws_ecs_task_definition.main.arn
+  desired_count                     = var.desired_count
+  iam_role                          = aws_iam_role.service.arn
+  health_check_grace_period_seconds = var.health_check_grace_period
 
   deployment_minimum_healthy_percent = 50
   deployment_maximum_percent         = 200
 
   load_balancer {
-    target_group_arn = "${aws_lb_target_group.main.arn}"
-    container_name   = "${var.name_prefix}"
-    container_port   = "${var.target["port"]}"
+    target_group_arn = aws_lb_target_group.main.arn
+    container_name   = var.name_prefix
+    container_port   = var.target["port"]
   }
 
   ordered_placement_strategy {
@@ -53,18 +67,18 @@ resource "aws_ecs_service" "main" {
 
 # NOTE: Takes a map of KEY = value and turns it into a list of: { name: KEY, value: value }.
 data "null_data_source" "environment" {
-  count = "${var.task_container_environment_count}"
+  count = var.task_container_environment_count
 
   inputs = {
-    name  = "${element(keys(var.task_container_environment), count.index)}"
-    value = "${element(values(var.task_container_environment), count.index)}"
+    name  = element(keys(var.task_container_environment), count.index)
+    value = element(values(var.task_container_environment), count.index)
   }
 }
 
 # NOTE: HostPort must be 0 to use dynamic port mapping.
 resource "aws_ecs_task_definition" "main" {
-  family        = "${var.name_prefix}"
-  task_role_arn = "${aws_iam_role.task.arn}"
+  family        = var.name_prefix
+  task_role_arn = aws_iam_role.task.arn
 
   container_definitions = <<EOF
 [{
@@ -93,27 +107,27 @@ EOF
 
 # Logging group for the ECS agent
 resource "aws_cloudwatch_log_group" "main" {
-  name = "${var.name_prefix}"
+  name = var.name_prefix
 }
 
 resource "aws_iam_role" "service" {
   name               = "${var.name_prefix}-service-role"
-  assume_role_policy = "${data.aws_iam_policy_document.service_assume.json}"
+  assume_role_policy = data.aws_iam_policy_document.service_assume.json
 }
 
 resource "aws_iam_role_policy" "service_permissions" {
   name   = "${var.name_prefix}-service-permissions"
-  role   = "${aws_iam_role.service.id}"
-  policy = "${data.aws_iam_policy_document.service_permissions.json}"
+  role   = aws_iam_role.service.id
+  policy = data.aws_iam_policy_document.service_permissions.json
 }
 
 resource "aws_iam_role" "task" {
   name               = "${var.name_prefix}-task-role"
-  assume_role_policy = "${data.aws_iam_policy_document.task_assume.json}"
+  assume_role_policy = data.aws_iam_policy_document.task_assume.json
 }
 
 resource "aws_iam_role_policy" "log_agent" {
   name   = "${var.name_prefix}-log-permissions"
-  role   = "${var.cluster_role_name}"
-  policy = "${data.aws_iam_policy_document.task_log.json}"
+  role   = var.cluster_role_name
+  policy = data.aws_iam_policy_document.task_log.json
 }
