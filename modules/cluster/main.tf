@@ -12,16 +12,14 @@ resource "aws_cloudwatch_log_group" "main" {
   retention_in_days = var.log_retention_in_days
 }
 
-data "template_file" "main" {
-  template = file("${path.module}/cloud-config.yml")
-
-  vars = {
+locals {
+  cloud_config = templatefile("${path.module}/cloud-config.yml", {
     stack_name       = "${var.name_prefix}-cluster-asg"
     region           = data.aws_region.current.name
     log_group_name   = aws_cloudwatch_log_group.main.name
     ecs_cluster_name = aws_ecs_cluster.main.name
     ecs_log_level    = var.ecs_log_level
-  }
+  })
 }
 
 data "aws_iam_policy_document" "permissions" {
@@ -76,7 +74,7 @@ module "asg" {
   source               = "telia-oss/asg/aws"
   version              = "v3.0.1"
   name_prefix          = "${var.name_prefix}-cluster"
-  user_data            = coalesce(var.user_data, data.template_file.main.rendered)
+  user_data            = coalesce(var.user_data, local.cloud_config)
   vpc_id               = var.vpc_id
   subnet_ids           = var.subnet_ids
   await_signal         = "true"
