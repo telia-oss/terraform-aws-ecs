@@ -128,17 +128,11 @@ module "application" {
     load_balancer = module.alb.arn
   }
 
-  health_check = [{
+  health_check = {
     port    = 80
     path    = "/"
     matcher = "200"
-
-    healthy_threshold   = null
-    interval            = null
-    protocol            = null
-    timeout             = null
-    unhealthy_threshold = null
-  }]
+  }
 
   tags = {
     environment = "prod"

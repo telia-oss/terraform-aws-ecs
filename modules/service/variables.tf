@@ -28,16 +28,7 @@ variable "target" {
 
 variable "health_check" {
   description = "A health block containing health check settings for the target group. Overrides the defaults."
-  type = list(object({
-    healthy_threshold   = number
-    interval            = number
-    matcher             = string
-    path                = string
-    port                = number
-    protocol            = string
-    timeout             = number
-    unhealthy_threshold = number
-  }))
+  type        = map(string)
 }
 
 variable "health_check_grace_period" {
