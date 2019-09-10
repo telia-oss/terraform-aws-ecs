@@ -1,5 +1,10 @@
+terraform {
+  required_version = ">= 0.12"
+}
+
 provider "aws" {
-  region = "eu-west-1"
+  version = ">= 2.17"
+  region  = "eu-west-1"
 }
 
 data "aws_vpc" "main" {
