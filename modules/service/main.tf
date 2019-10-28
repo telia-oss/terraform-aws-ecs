@@ -96,6 +96,7 @@ resource "aws_ecs_task_definition" "main" {
             "awslogs-stream-prefix": "container"
         }
     },
+    "stopTimeout": ${var.stop_timeout},
     "command": ${jsonencode(var.task_container_command)},
     "environment": ${jsonencode(data.null_data_source.environment.*.outputs)}
 }]
