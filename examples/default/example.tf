@@ -177,3 +177,8 @@ data "aws_iam_policy_document" "privileges" {
     ]
   }
 }
+
+output "task_url" {
+  description = "Url to the task"
+  value       = "${module.alb.dns_name}/app/"
+}
