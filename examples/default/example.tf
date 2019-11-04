@@ -133,7 +133,6 @@ module "application" {
   }
 
   health_check = {
-    port    = 80
     path    = "/"
     matcher = "200"
   }
