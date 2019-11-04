@@ -21,6 +21,12 @@ variable "cluster_role_name" {
   type        = string
 }
 
+variable "placement_constraint" {
+  default     = ""
+  description = "The type of constraint. The only valid values at this time are memberOf and distinctInstance."
+  type        = string
+}
+
 variable "target" {
   description = "A target block containing the protocol and port exposed on the container."
   type        = map(string)
