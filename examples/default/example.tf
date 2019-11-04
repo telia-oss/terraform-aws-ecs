@@ -133,7 +133,6 @@ module "application" {
   }
 
   health_check = {
-    port    = 80
     path    = "/"
     matcher = "200"
   }
@@ -177,4 +176,9 @@ data "aws_iam_policy_document" "privileges" {
       "*",
     ]
   }
+}
+
+output "task_url" {
+  description = "Url to the task"
+  value       = "http://${module.alb.dns_name}/app/"
 }
