@@ -43,6 +43,12 @@ variable "health_check_grace_period" {
   type        = number
 }
 
+variable "stop_timeout" {
+  default     = 30
+  description = "Time duration (in seconds) to wait before the container is forcefully killed if it doesn't exit normally on its own. The default is 30 seconds."
+  type        = number
+}
+
 variable "desired_count" {
   description = "The number of instances of the task definition to place and keep running."
   default     = 1
