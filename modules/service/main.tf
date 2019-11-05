@@ -56,6 +56,14 @@ resource "aws_ecs_service" "main" {
     container_port   = var.target["port"]
   }
 
+
+  dynamic "placement_constraints" {
+    for_each = var.placement_constraint == "" ? [] : [1]
+    content {
+      type = var.placement_constraint
+    }
+  }
+
   ordered_placement_strategy {
     type  = "spread"
     field = "instanceId"
