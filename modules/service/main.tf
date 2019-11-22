@@ -68,6 +68,15 @@ resource "aws_ecs_service" "main" {
     type  = "spread"
     field = "instanceId"
   }
+
+  dynamic "service_registries" {
+    for_each = var.service_registry_arn == "" ? [] : [1]
+    content {
+      registry_arn   = var.service_registry_arn
+      container_port = var.target["port"]
+      container_name = var.name_prefix
+    }
+  }
 }
 
 # NOTE: Takes a map of KEY = value and turns it into a list of: { name: KEY, value: value }.
