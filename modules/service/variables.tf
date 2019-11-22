@@ -11,6 +11,11 @@ variable "vpc_id" {
   type        = string
 }
 
+variable "private_subnet_ids" {
+  description = "A list of private subnets inside the VPC"
+  type        = list(string)
+}
+
 variable "cluster_id" {
   description = "The Amazon Resource Name (ARN) that identifies the cluster."
   type        = string
