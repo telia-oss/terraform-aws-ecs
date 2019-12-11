@@ -15,7 +15,7 @@ resource "aws_lb_target_group" "main" {
   vpc_id      = var.vpc_id
   protocol    = var.target["protocol"]
   port        = var.target["port"]
-  target_type = "ip"
+  target_type = var.network_mode == "awsvpc" ? "ip" : null
 
   health_check {
     enabled             = lookup(var.health_check, "enabled", null)
@@ -63,9 +63,12 @@ resource "aws_ecs_service" "main" {
   deployment_minimum_healthy_percent = 50
   deployment_maximum_percent         = 200
 
-  network_configuration {
-    subnets         = var.private_subnet_ids
-    security_groups = [aws_security_group.ecs_service.id]
+  dynamic "network_configuration" {
+    for_each = var.private_subnet_ids == [] ? [] : [1]
+    content {
+      subnets         = var.private_subnet_ids
+      security_groups = [aws_security_group.ecs_service.id]
+    }
   }
 
   load_balancer {
@@ -110,7 +113,7 @@ data "null_data_source" "environment" {
 resource "aws_ecs_task_definition" "main" {
   family        = var.name_prefix
   task_role_arn = aws_iam_role.task.arn
-  network_mode  = "awsvpc"
+  network_mode  = var.network_mode
 
   container_definitions = <<EOF
 [{
@@ -120,7 +123,7 @@ resource "aws_ecs_task_definition" "main" {
     "memoryReservation": ${var.task_container_memory_reservation},
     "essential": true,
     "portMappings": [{
-      "HostPort": ${var.target["port"]},
+      "HostPort": ${var.network_mode == "awsvpc" ? var.target["port"] : 0},
       "ContainerPort": ${var.target["port"]}
     }],
     "logConfiguration": {

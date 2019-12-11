@@ -12,6 +12,7 @@ variable "vpc_id" {
 }
 
 variable "private_subnet_ids" {
+  default     = []
   description = "A list of private subnets inside the VPC"
   type        = list(string)
 }
