@@ -12,9 +12,10 @@ data "aws_lb_target_group" "default" {
 }
 
 resource "aws_lb_target_group" "main" {
-  vpc_id   = var.vpc_id
-  protocol = var.target["protocol"]
-  port     = var.target["port"]
+  vpc_id      = var.vpc_id
+  protocol    = var.target["protocol"]
+  port        = var.target["port"]
+  target_type = "ip"
 
   health_check {
     enabled             = lookup(var.health_check, "enabled", null)
@@ -38,24 +39,40 @@ resource "aws_lb_target_group" "main" {
   tags = merge(var.tags, map("Name", "${var.name_prefix}-target-${var.target["port"]}"))
 }
 
+resource "aws_security_group" "ecs_service" {
+  vpc_id      = var.vpc_id
+  name        = "${var.name_prefix}-ecs-service-sg"
+  description = "ECS service security group"
+  tags = merge(
+    var.tags,
+    {
+      Name = "${var.name_prefix}-sg"
+    },
+  )
+}
+
 resource "aws_ecs_service" "main" {
-  depends_on                        = ["data.aws_lb_target_group.default", "aws_iam_role_policy.service_permissions"]
-  name                              = var.name_prefix
-  cluster                           = var.cluster_id
-  task_definition                   = aws_ecs_task_definition.main.arn
-  desired_count                     = var.desired_count
-  iam_role                          = aws_iam_role.service.arn
+  depends_on      = [data.aws_lb_target_group.default, aws_iam_role_policy.service_permissions]
+  name            = var.name_prefix
+  cluster         = var.cluster_id
+  task_definition = aws_ecs_task_definition.main.arn
+  desired_count   = var.desired_count
+  # iam_role                          = aws_iam_role.service.arn
   health_check_grace_period_seconds = var.health_check_grace_period
 
   deployment_minimum_healthy_percent = 50
   deployment_maximum_percent         = 200
+
+  network_configuration {
+    subnets         = var.private_subnet_ids
+    security_groups = [aws_security_group.ecs_service.id]
+  }
 
   load_balancer {
     target_group_arn = aws_lb_target_group.main.arn
     container_name   = var.name_prefix
     container_port   = var.target["port"]
   }
-
 
   dynamic "placement_constraints" {
     for_each = var.placement_constraint == "" ? [] : [1]
@@ -93,6 +110,7 @@ data "null_data_source" "environment" {
 resource "aws_ecs_task_definition" "main" {
   family        = var.name_prefix
   task_role_arn = aws_iam_role.task.arn
+  network_mode  = "awsvpc"
 
   container_definitions = <<EOF
 [{
@@ -102,7 +120,7 @@ resource "aws_ecs_task_definition" "main" {
     "memoryReservation": ${var.task_container_memory_reservation},
     "essential": true,
     "portMappings": [{
-      "HostPort": 0,
+      "HostPort": ${var.target["port"]},
       "ContainerPort": ${var.target["port"]}
     }],
     "logConfiguration": {
