@@ -107,3 +107,9 @@ variable "service_registry_arn" {
   description = "ARN of aws_service_discovery_service resource"
   type        = string
 }
+
+variable "network_mode" {
+  default     = ""
+  description = "The Docker networking mode to use for the containers in the task. The valid values are none, bridge, awsvpc, and host."
+  type        = string
+}
