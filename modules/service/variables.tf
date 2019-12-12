@@ -11,6 +11,12 @@ variable "vpc_id" {
   type        = string
 }
 
+variable "private_subnet_ids" {
+  default     = []
+  description = "A list of private subnets inside the VPC"
+  type        = list(string)
+}
+
 variable "cluster_id" {
   description = "The Amazon Resource Name (ARN) that identifies the cluster."
   type        = string
@@ -99,5 +105,11 @@ variable "tags" {
 variable "service_registry_arn" {
   default     = ""
   description = "ARN of aws_service_discovery_service resource"
+  type        = string
+}
+
+variable "network_mode" {
+  default     = ""
+  description = "The Docker networking mode to use for the containers in the task. The valid values are none, bridge, awsvpc, and host."
   type        = string
 }
