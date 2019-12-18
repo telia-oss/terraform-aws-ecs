@@ -1,0 +1,149 @@
+{
+    "widgets": [
+    {% for item in template_data_list %}
+        {
+            "type": "metric",
+            "x": 0,
+            "y": {{ item['y']*5 }},
+            "width": 5,
+            "height": 5,
+            "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                    [ "AWS/ECS", "MemoryUtilization", "ServiceName", "{{ item['ecs_service'] }}", "ClusterName", "{{ item['ecs_cluster_name'] }}" ]
+                ],
+                "region": "{{ item['region'] }}",
+                "title": "{{ item['ecs_service'] }} - memory usage",
+                "yAxis": {
+                    "left": {
+                        "min": 0,
+                        "max": 100
+                    }
+                } 
+            }
+        },
+        {
+            "type": "metric",
+            "x": 5,
+            "y": {{ item['y']*5 }},
+            "width": 5,
+            "height": 5,
+            "properties": {
+                "metrics": [
+                    [ "AWS/ECS", "CPUUtilization", "ServiceName", "{{ item['ecs_service'] }}", "ClusterName", "{{ item['ecs_cluster_name'] }}" ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "{{ item['region'] }}",
+                "title": "{{ item['ecs_service'] }} - cpu usage",
+                "yAxis": {
+                    "left": {
+                        "min": 0,
+                        "max": 100
+                    }
+                } 
+            }
+        },
+        {
+            "type": "metric",
+            "x": 10,
+            "y": {{ item['y']*5 }},
+            "width": 5,
+            "height": 5,
+            "properties": {
+                "metrics": [
+                    [ "AWS/ApplicationELB", "RequestCountPerTarget", "TargetGroup", "targetgroup/{{ item['target_group_name'] }}/{{ item['target_group_id'] }}", { "stat": "Sum", "period": 60 }]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "{{ item['region'] }}",
+                "title": "{{ item['ecs_service'] }} - request count",
+                "yAxis": {
+                    "left": {
+                        "min": 0
+                    }
+                } 
+            }
+        }
+        {% if item['load_balancer'] != "" %}
+        ,
+        {
+            "type": "metric",
+            "x": 15,
+            "y": {{ item['y']*5 }},
+            "width": 5,
+            "height": 5,
+            "properties": {
+                "metrics": [
+                    [ "AWS/ApplicationELB", "TargetResponseTime", "TargetGroup", "targetgroup/{{ item['target_group_name'] }}/{{ item['target_group_id'] }}", "LoadBalancer", "app/{{ item['load_balancer_name'] }}/{{ item['load_balancer_id'] }}" ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "eu-west-1",
+                "title": "{{ item['ecs_service'] }} - tg elb response time",
+                "yAxis": {
+                    "left": {
+                        "min": 0
+                    }
+                }
+            }
+        }
+        {% else %}
+        ,
+        {
+            "type": "text",
+            "x": 15,
+            "y": {{ item['y']*5 }},
+            "width": 5,
+            "height": 5,
+            "properties": {
+                "markdown": "\n ELB not associated\n"
+            }
+        }
+        {% endif %}
+
+        {% if item['load_balancer'] != "" %}
+        ,
+        {
+            "type": "metric",
+            "x": 20,
+            "y": {{ item['y']*5 }},
+            "width": 4,
+            "height": 5,
+            "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                    [ "AWS/ApplicationELB", "UnHealthyHostCount", "TargetGroup", "targetgroup/{{ item['target_group_name'] }}/{{ item['target_group_id'] }}", "LoadBalancer", "app/{{ item['load_balancer_name'] }}/{{ item['load_balancer_id'] }}" ],
+                    [ ".", "HealthyHostCount", ".", ".", ".", "." ]
+                ],
+                "region": "eu-west-1",
+                "title": "{{ item['ecs_service'] }} - health hosts",
+                "yAxis": {
+                    "left": {
+                        "min": 0
+                    }
+                }
+            }
+        }
+        {% else %}
+        ,
+        {
+            "type": "text",
+            "x": 20,
+            "y": {{ item['y']*5 }},
+            "width": 4,
+            "height": 5,
+            "properties": {
+                "markdown": "\n ELB not associated\n"
+            }
+        }
+        {% endif %}
+
+        {% if not loop.last %}
+        ,
+        {% endif %}
+    {% endfor %}
+    ]
+}
