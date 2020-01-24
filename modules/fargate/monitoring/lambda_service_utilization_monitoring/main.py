@@ -66,7 +66,7 @@ def lambda_handler(event, context):
     ]
 
     alert_list_response = clw_client.describe_alarms(
-        AlarmNamePrefix='NEO/ECS Service ',
+        AlarmNamePrefix='FARGATE/ECS Service ',
     )
     alert_list_response = alert_list_response['MetricAlarms']
 
@@ -81,7 +81,7 @@ def lambda_handler(event, context):
     )
 
     for service in services_names:
-        alarm_name = 'NEO/ECS Service ' + service + ' MEM utilization'
+        alarm_name = 'FARGATE/ECS Service ' + service + ' MEM utilization'
         logging.info("Adding \"" + alarm_name + "\" not present")
         if alarm_name not in [alert['AlarmName'] for alert in alert_list_response]:
             clw_client.put_metric_alarm(
@@ -114,7 +114,7 @@ def lambda_handler(event, context):
                     sns_alert_topic,
                 ] if sns_alert_topic != "" else []
             )
-        alarm_name = 'NEO/ECS Service ' + service + ' CPU utilization'
+        alarm_name = 'FARGATE/ECS Service ' + service + ' CPU utilization'
         logging.info("Adding \"" + alarm_name + "\" not present")
         if alarm_name not in [alert['AlarmName'] for alert in alert_list_response]:
             clw_client.put_metric_alarm(
