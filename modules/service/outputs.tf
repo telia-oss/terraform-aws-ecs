@@ -30,3 +30,7 @@ output "task_role_name" {
   description = "The name of the task role."
   value       = aws_iam_role.task.name
 }
+
+output "service_sg_id" {
+  value = aws_security_group.ecs_service.id
+}
