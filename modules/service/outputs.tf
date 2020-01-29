@@ -32,5 +32,6 @@ output "task_role_name" {
 }
 
 output "service_sg_id" {
-  value = aws_security_group.ecs_service.id
+  description = "The security group id"
+  value       = aws_security_group.ecs_service.id
 }
