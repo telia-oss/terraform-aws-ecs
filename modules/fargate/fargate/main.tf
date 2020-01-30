@@ -276,50 +276,8 @@ EOF
   )
 }
 
-resource "aws_ecs_service" "service_with_no_service_registries" {
-  for_each = { for i, z in var.containers_definitions : i => z if lookup(z, "service_registry_arn", "") != "" }
-
-  depends_on                         = [null_resource.lb_exists]
-  name                               = each.key
-  cluster                            = var.cluster_id
-  task_definition                    = aws_ecs_task_definition.task[each.key].arn
-  desired_count                      = lookup(var.containers_definitions[each.key], "task_desired_count", 1)
-  launch_type                        = "FARGATE"
-  deployment_minimum_healthy_percent = lookup(var.containers_definitions[each.key], "deployment_minimum_healthy_percent", 50)
-  deployment_maximum_percent         = lookup(var.containers_definitions[each.key], "deployment_maximum_percent", 200)
-  health_check_grace_period_seconds  = lookup(var.containers_definitions[each.key], "health_check_grace_period_seconds", 300)
-
-  network_configuration {
-    subnets          = var.private_subnet_ids
-    security_groups  = [aws_security_group.ecs_service[each.key].id]
-    assign_public_ip = lookup(var.containers_definitions[each.key], "task_container_assign_public_ip", null)
-  }
-
-  load_balancer {
-    container_name   = lookup(var.containers_definitions[each.key], "task_container_name", null)
-    container_port   = lookup(var.containers_definitions[each.key], "task_container_port", null)
-    target_group_arn = aws_lb_target_group.task[each.key].arn
-  }
-
-  deployment_controller {
-    # The deployment controller type to use. Valid values: CODE_DEPLOY, ECS.
-    type = lookup(var.containers_definitions[each.key], "deployment_controller_type", "ECS")
-  }
-
-  service_registries {
-    registry_arn   = lookup(var.containers_definitions[each.key], "service_registry_arn", null)
-    container_port = lookup(var.containers_definitions[each.key], "task_container_port", null)
-    container_name = lookup(var.containers_definitions[each.key], "task_container_name", each.key)
-  }
-
-  tags = merge(
-    var.tags,
-    lookup(var.containers_definitions[each.key], "task_tags", {})
-  )
-}
-
 resource "aws_ecs_service" "service" {
-  for_each = { for i, z in var.containers_definitions : i => z if lookup(z, "service_registry_arn", "") == "" }
+  for_each = var.containers_definitions
 
   depends_on                         = [null_resource.lb_exists]
   name                               = each.key
@@ -346,6 +304,15 @@ resource "aws_ecs_service" "service" {
   deployment_controller {
     # The deployment controller type to use. Valid values: CODE_DEPLOY, ECS.
     type = lookup(var.containers_definitions[each.key], "deployment_controller_type", "ECS")
+  }
+
+  dynamic service_registries {
+    for_each = lookup(var.containers_definitions[each.key], "service_registry_arn", null) != "" ? [] : [1]
+    content {
+    registry_arn   = lookup(var.containers_definitions[each.key], "service_registry_arn", null)
+    container_port = lookup(var.containers_definitions[each.key], "task_container_port", null)
+    container_name = lookup(var.containers_definitions[each.key], "task_container_name", each.key)
+      }
   }
 }
 

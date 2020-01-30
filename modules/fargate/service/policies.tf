@@ -11,22 +11,6 @@ data "aws_iam_policy_document" "task_assume" {
   }
 }
 
-# Task logging privileges
-data "aws_iam_policy_document" "task_permissions" {
-  statement {
-    effect = "Allow"
-
-    resources = [
-      aws_cloudwatch_log_group.main.arn,
-    ]
-
-    actions = [
-      "logs:CreateLogStream",
-      "logs:PutLogEvents",
-    ]
-  }
-}
-
 # Task ecr privileges
 data "aws_iam_policy_document" "task_execution_permissions" {
   statement {
