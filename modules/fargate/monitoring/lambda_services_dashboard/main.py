@@ -2,7 +2,7 @@ import json
 import boto3
 import logging
 import os
-from jinja2 import Environment, FileSystemLoader
+import json
 
 session = boto3.session.Session()
 logging.basicConfig()
@@ -28,11 +28,8 @@ def lambda_handler(event, context):
         region_name=ecs_region_name
     )
 
-    templates_dir = './templates'
-    env = Environment(loader=FileSystemLoader(templates_dir))
-    template = env.get_template('dashboard.json.j2')
-
     dashboard_data = {}
+    services_dict = {"widgets": []}
 
     # basic listing, list services returns only 10 records at once
     services = ecs.list_services(
@@ -73,25 +70,150 @@ def lambda_handler(event, context):
 
     template_data_list = []
     y_counter = 0
-
     for service in dashboard_data:
-        template_data_list += [
-            {
-                "target_group_id": dashboard_data[service]['target_group_id'],
-                "target_group_name": dashboard_data[service]['target_group'],
-                "ecs_service": service,
-                "load_balancer_name": dashboard_data[service]['load_balancer'],
-                "load_balancer_id": dashboard_data[service]['load_balancer_id'],
-                "ecs_cluster_name": cluster_name,
+        # blok pro services_dict
+        services_dict['widgets'].append({
+            "type": "metric",
+            "x": 0,
+            "y": y_counter * 5,
+            "width": 5,
+            "height": 5,
+            "properties": {
+                "view": "timeSeries",
+                "stacked": False,
+                "metrics": [
+                    ["AWS/ECS", "MemoryUtilization", "ServiceName", service, "ClusterName",
+                     cluster_name]
+                ],
                 "region": ecs_region_name,
-                "y": y_counter,
+                "title": service+" - memory usage",
+                "yAxis": {
+                    "left": {
+                        "min": 0,
+                        "max": 100
+                    }
+                }
             }
-        ]
+        })
+        services_dict['widgets'].append({
+            "type": "metric",
+            "x": 5,
+            "y": y_counter * 5,
+            "width": 5,
+            "height": 5,
+            "properties": {
+                "metrics": [
+                    [ "AWS/ECS", "CPUUtilization", "ServiceName", service, "ClusterName", cluster_name]
+                ],
+                "view": "timeSeries",
+                "stacked": False,
+                "region": ecs_region_name,
+                "title": service+" - cpu usage",
+                "yAxis": {
+                    "left": {
+                        "min": 0,
+                        "max": 100
+                    }
+                }
+            }
+        })
+        services_dict['widgets'].append({
+            "type": "metric",
+            "x": 10,
+            "y": y_counter * 5,
+            "width": 5,
+            "height": 5,
+            "properties": {
+                "metrics": [
+                    ["AWS/ApplicationELB", "RequestCountPerTarget", "TargetGroup",
+                     "targetgroup/"+dashboard_data[service]['target_group']+"/"+dashboard_data[service]['target_group_id'],
+                     {"stat": "Sum", "period": 60}]
+                ],
+                "view": "timeSeries",
+                "stacked": False,
+                "region": ecs_region_name,
+                "title": service+" - request count",
+                "yAxis": {
+                    "left": {
+                        "min": 0
+                    }
+                }
+            }
+        })
+        if dashboard_data[service]['load_balancer'] != "":
+            services_dict['widgets'].append({
+                "type": "metric",
+                "x": 15,
+                "y": y_counter * 5,
+                "width": 5,
+                "height": 5,
+                "properties": {
+                    "metrics": [
+                        ["AWS/ApplicationELB", "TargetResponseTime", "TargetGroup",
+                         "targetgroup/"+dashboard_data[service]['target_group']+"/"+dashboard_data[service]['target_group_id'], "LoadBalancer",
+                         "app/"+dashboard_data[service]['load_balancer']+"/"+dashboard_data[service]['load_balancer_id']]
+                    ],
+                    "view": "timeSeries",
+                    "stacked": False,
+                    "region": ecs_region_name,
+                    "title": service+" - tg elb response time",
+                    "yAxis": {
+                        "left": {
+                            "min": 0
+                        }
+                    }
+                }
+            })
+        else:
+            services_dict['widgets'].append({
+                "type": "text",
+                "x": 15,
+                "y": y_counter * 5,
+                "width": 5,
+                "height": 5,
+                "properties": {
+                    "markdown": "\n ELB not associated\n"
+                }
+            })
+        if dashboard_data[service]['load_balancer'] != "":
+            services_dict['widgets'].append({
+                "type": "metric",
+                "x": 20,
+                "y": y_counter * 5,
+                "width": 4,
+                "height": 5,
+                "properties": {
+                    "view": "timeSeries",
+                    "stacked": False,
+                    "metrics": [
+                        ["AWS/ApplicationELB", "UnHealthyHostCount", "TargetGroup",
+                         "targetgroup/"+dashboard_data[service]['target_group']+"/"+dashboard_data[service]['target_group_id'], "LoadBalancer",
+                         "app/"+dashboard_data[service]['load_balancer']+"/"+dashboard_data[service]['load_balancer_id']],
+                        [".", "HealthyHostCount", ".", ".", ".", "."]
+                    ],
+                    "region": ecs_region_name,
+                    "title": service+" - health hosts",
+                    "yAxis": {
+                        "left": {
+                            "min": 0
+                        }
+                    }
+                }
+            })
+        else:
+            services_dict['widgets'].append({
+                "type": "text",
+                "x": 20,
+                "y": y_counter * 5,
+                "width": 4,
+                "height": 5,
+                "properties": {
+                    "markdown": "\n ELB not associated\n"
+                }
+            })
         y_counter += 1
 
-    dashboard_body = template.render(
-        template_data_list=template_data_list
-    )
+    dashboard_body = json.dumps(services_dict)
     clw.put_dashboard(
         DashboardName=cluster_name + "-ecs-services-list-dashboard",
         DashboardBody=dashboard_body
@@ -105,3 +227,4 @@ def lambda_handler(event, context):
 
 if __name__ == "__main__":
     lambda_handler("", "")
+
