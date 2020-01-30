@@ -6,66 +6,19 @@ resource "random_string" "lambda_postfix_generator" {
   special = false
 }
 
-resource "aws_iam_role" "lambda_main" {
-  name               = "${var.name_prefix}-role-${random_string.lambda_postfix_generator.result}"
-  assume_role_policy = data.aws_iam_policy_document.lambda_assume.json
-}
-
-resource "aws_iam_role_policy" "lambda_main" {
-  name   = "${var.name_prefix}-policy-${random_string.lambda_postfix_generator.result}"
-  role   = aws_iam_role.lambda_main.name
-  policy = var.policy
-}
-
-data "aws_iam_policy_document" "lambda_assume" {
-  statement {
-    effect = "Allow"
-
-    actions = [
-      "sts:AssumeRole",
-    ]
-
-    principals {
-      type = "Service"
-
-      identifiers = [
-        "lambda.amazonaws.com",
-      ]
-    }
-  }
-}
-
 resource "aws_cloudwatch_log_group" "lambda_log_group" {
-  name              = "/aws/lambda/${aws_lambda_function.lambda.function_name}"
+  name              = "/aws/lambda/${module.lambda.name}"
   retention_in_days = var.log_retention_in_days
 }
 
-resource "aws_lambda_function" "lambda" {
-  function_name = "${var.name_prefix}-${random_string.lambda_postfix_generator.result}"
-  filename      = var.filename
-
-  environment {
-    variables = var.environment
-  }
-
-  tags = var.tags
-
-  handler = var.handler
-  runtime = var.runtime
-
-  timeout = var.timeout
-
-  role = aws_iam_role.lambda_main.arn
-
-  lifecycle {
-    ignore_changes = [
-      "filename",
-      "last_modified",
-    ]
-  }
-
-  vpc_config {
-    subnet_ids         = var.subnet_ids
-    security_group_ids = var.security_group_ids
-  }
+module "lambda" {
+  source      = "git::https://github.com/telia-oss/terraform-aws-lambda"
+  name_prefix = var.name_prefix
+  filename    = var.filename
+  policy      = var.policy
+  runtime     = var.runtime
+  handler     = var.handler
+  environment = var.environment
+  tags        = var.tags
 }
+

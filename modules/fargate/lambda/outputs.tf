@@ -1,7 +1,8 @@
-output "arn" {
-  value = aws_lambda_function.lambda.arn
-}
 
+
+output "arn" {
+  value = module.lambda.arn
+}
 output "name" {
-  value = aws_lambda_function.lambda.function_name
+  value = module.lambda.name
 }
