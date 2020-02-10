@@ -101,3 +101,27 @@ variable "service_registry_arn" {
   description = "ARN of aws_service_discovery_service resource"
   type        = string
 }
+
+variable "service_launch_type" {
+  default = "EC2"
+  description = "The launch type on which to run your service. The valid values are EC2 and FARGATE. Defaults to EC2."
+  type = string
+}
+
+variable "subnet_ids" {
+  default = []
+  description = "A list of subnets inside the VPC"
+  type        = list(string)
+}
+
+variable "security_groups_ecs_id" {
+  default = ""
+  description = "ID of secure group for ecs"
+  type = string
+}
+
+variable "task_container_assign_public_ip" {
+  description = "Assigned public IP to the container."
+  default     = false
+  type        = bool
+}
