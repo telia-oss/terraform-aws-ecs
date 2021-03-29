@@ -41,11 +41,11 @@ resource "aws_lb_target_group" "main" {
 
 resource "aws_ecs_service" "main" {
 
-  depends_on      = ["data.aws_lb_target_group.default", "aws_iam_role_policy.service_permissions"]
-  name            = var.name_prefix
-  cluster         = var.cluster_id
-  task_definition = aws_ecs_task_definition.main.arn
-  desired_count   = var.desired_count
+  depends_on                        = [data.aws_lb_target_group.default, aws_iam_role_policy.service_permissions]
+  name                              = var.name_prefix
+  cluster                           = var.cluster_id
+  task_definition                   = aws_ecs_task_definition.main.arn
+  desired_count                     = var.desired_count
   iam_role                          = var.service_launch_type == "FARGATE" ? null : aws_iam_role.service.arn
   health_check_grace_period_seconds = var.health_check_grace_period
   launch_type                       = var.service_launch_type
@@ -53,13 +53,13 @@ resource "aws_ecs_service" "main" {
   deployment_minimum_healthy_percent = 50
   deployment_maximum_percent         = 200
 
-  dynamic network_configuration {
-    for_each    = var.service_launch_type == "FARGATE" ? [1] : []
+  dynamic "network_configuration" {
+    for_each = var.service_launch_type == "FARGATE" ? [1] : []
     content {
-    subnets          = var.subnet_ids
-    security_groups  = [var.security_groups_ecs_id]
-    assign_public_ip = var.task_container_assign_public_ip
-      }
+      subnets          = var.subnet_ids
+      security_groups  = [var.security_groups_ecs_id]
+      assign_public_ip = var.task_container_assign_public_ip
+    }
   }
 
   load_balancer {
@@ -76,12 +76,12 @@ resource "aws_ecs_service" "main" {
     }
   }
 
-  dynamic ordered_placement_strategy {
+  dynamic "ordered_placement_strategy" {
     for_each = var.service_launch_type == "FARGATE" ? [] : [1]
     content {
-    type  = "spread"
-    field = "instanceId"
-      }
+      type  = "spread"
+      field = "instanceId"
+    }
   }
 
   dynamic "service_registries" {
@@ -96,14 +96,16 @@ resource "aws_ecs_service" "main" {
 
 
 # NOTE: Takes a map of KEY = value and turns it into a list of: { name: KEY, value: value }.
-data "null_data_source" "environment" {
-  count = var.task_container_environment_count
-
-  inputs = {
-    name  = element(keys(var.task_container_environment), count.index)
-    value = element(values(var.task_container_environment), count.index)
-  }
+locals {
+  environment = [
+    for k, v in var.task_container_environment :
+    {
+      name  = k
+      value = v
+    }
+  ]
 }
+
 
 # NOTE: HostPort must be 0 to use dynamic port mapping when ec2 using.
 resource "aws_ecs_task_definition" "main" {
@@ -135,7 +137,7 @@ resource "aws_ecs_task_definition" "main" {
     },
     "stopTimeout": ${var.stop_timeout},
     "command": ${jsonencode(var.task_container_command)},
-    "environment": ${jsonencode(data.null_data_source.environment.*.outputs)}
+    "environment": ${jsonencode(local.environment)}
 }]
 EOF
 }

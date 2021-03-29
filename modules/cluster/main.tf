@@ -72,7 +72,7 @@ data "aws_iam_policy_document" "permissions" {
 
 module "asg" {
   source               = "telia-oss/asg/aws"
-  version              = "v3.0.1"
+  version              = "v3.3.1"
   name_prefix          = "${var.name_prefix}-cluster"
   user_data            = coalesce(var.user_data, local.cloud_config)
   vpc_id               = var.vpc_id

@@ -84,11 +84,6 @@ variable "task_container_environment" {
   type        = map(string)
 }
 
-variable "task_container_environment_count" {
-  description = "NOTE: This exists purely to calculate count in Terraform. Should equal the length of your environment map."
-  default     = 0
-  type        = number
-}
 
 variable "tags" {
   description = "A map of tags (key-value pairs) passed to resources."
@@ -103,21 +98,21 @@ variable "service_registry_arn" {
 }
 
 variable "service_launch_type" {
-  default = "EC2"
+  default     = "EC2"
   description = "The launch type on which to run your service. The valid values are EC2 and FARGATE. Defaults to EC2."
-  type = string
+  type        = string
 }
 
 variable "subnet_ids" {
-  default = []
+  default     = []
   description = "A list of subnets inside the VPC"
   type        = list(string)
 }
 
 variable "security_groups_ecs_id" {
-  default = ""
+  default     = ""
   description = "ID of secure group for ecs"
-  type = string
+  type        = string
 }
 
 variable "task_container_assign_public_ip" {
