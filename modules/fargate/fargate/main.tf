@@ -169,10 +169,7 @@ resource "aws_lb_listener_rule" "routing_https" {
     target_group_arn = aws_lb_target_group.task[each.key].arn
   }
 
-  # condition {
-  #   field  = lookup(var.containers_definitions[each.key], "rule_field", "host-header")
-  #   values = lookup(var.containers_definitions[each.key], "rule_values", ["${each.key}.com"])
-  # }
+
 
   condition {
     host_header {
