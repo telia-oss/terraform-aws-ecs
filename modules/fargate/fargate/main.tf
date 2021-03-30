@@ -169,10 +169,15 @@ resource "aws_lb_listener_rule" "routing_https" {
     target_group_arn = aws_lb_target_group.task[each.key].arn
   }
 
+
+
   condition {
-    field  = lookup(var.containers_definitions[each.key], "rule_field", "host-header")
-    values = lookup(var.containers_definitions[each.key], "rule_values", ["${each.key}.com"])
+    host_header {
+      values = [lookup(var.containers_definitions[each.key], "rule_values", ["${each.key}.com"])]
+    }
   }
+
+
 }
 
 resource "aws_lb_listener_rule" "routing_http" {
@@ -185,8 +190,9 @@ resource "aws_lb_listener_rule" "routing_http" {
   }
 
   condition {
-    field  = lookup(var.containers_definitions[each.key], "rule_field", "host-header")
-    values = lookup(var.containers_definitions[each.key], "rule_values", ["${each.key}.com"])
+    host_header {
+      values = lookup(var.containers_definitions[each.key], "rule_values", ["${each.key}.com"])
+    }
   }
 }
 
@@ -306,13 +312,13 @@ resource "aws_ecs_service" "service" {
     type = lookup(var.containers_definitions[each.key], "deployment_controller_type", "ECS")
   }
 
-  dynamic service_registries {
+  dynamic "service_registries" {
     for_each = lookup(var.containers_definitions[each.key], "service_registry_arn", null) != "" ? [] : [1]
     content {
-    registry_arn   = lookup(var.containers_definitions[each.key], "service_registry_arn", null)
-    container_port = lookup(var.containers_definitions[each.key], "task_container_port", null)
-    container_name = lookup(var.containers_definitions[each.key], "task_container_name", each.key)
-      }
+      registry_arn   = lookup(var.containers_definitions[each.key], "service_registry_arn", null)
+      container_port = lookup(var.containers_definitions[each.key], "task_container_port", null)
+      container_name = lookup(var.containers_definitions[each.key], "task_container_name", each.key)
+    }
   }
 }
 

@@ -1,10 +1,9 @@
 terraform {
-  required_version = ">= 0.12"
+  required_version = ">= 0.14"
 }
 
 provider "aws" {
-  version = ">= 2.17"
-  region  = "eu-west-1"
+  region = "eu-west-1"
 }
 
 data "aws_vpc" "main" {

@@ -12,7 +12,8 @@ resource "aws_cloudwatch_log_group" "lambda_log_group" {
 }
 
 module "lambda" {
-  source      = "git::https://github.com/telia-oss/terraform-aws-lambda"
+  source      = "telia-oss/lambda/aws"
+  version     = "4.0.0"
   name_prefix = var.name_prefix
   filename    = var.filename
   policy      = var.policy
@@ -21,4 +22,3 @@ module "lambda" {
   environment = var.environment
   tags        = var.tags
 }
-

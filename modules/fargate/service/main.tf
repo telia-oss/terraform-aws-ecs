@@ -102,8 +102,9 @@ resource "aws_lb_listener_rule" "routing_https" {
   dynamic "condition" {
     for_each = var.service_listner_rules
     content {
-      field  = condition.value.field
-      values = condition.value.values
+      host_header {
+        values = condition.value.values
+      }
     }
   }
 }
@@ -121,8 +122,9 @@ resource "aws_lb_listener_rule" "routing_http" {
   dynamic "condition" {
     for_each = var.service_listner_rules
     content {
-      field  = condition.value.field
-      values = condition.value.values
+      host_header {
+        values = condition.value.values
+      }
     }
   }
 }
@@ -133,21 +135,21 @@ resource "aws_lb_listener_rule" "routing_http" {
 module "service" {
   source = "../../service"
 
-  cluster_id = var.cluster_id
-  cluster_role_name = module.service.task_role_name
-  health_check = var.health_check
-  name_prefix = var.name_prefix
-  service_launch_type = "FARGATE"
-  security_groups_ecs_id = aws_security_group.ecs_service.id
+  cluster_id                      = var.cluster_id
+  cluster_role_name               = module.service.task_role_name
+  health_check                    = var.health_check
+  name_prefix                     = var.name_prefix
+  service_launch_type             = "FARGATE"
+  security_groups_ecs_id          = aws_security_group.ecs_service.id
   task_container_assign_public_ip = var.task_container_assign_public_ip
-  subnet_ids = var.private_subnet_ids
+  subnet_ids                      = var.private_subnet_ids
   target = {
     protocol      = "HTTP"
     port          = var.task_container_port
     load_balancer = var.lb_arn
   }
-  task_container_image = var.task_container_image
-  vpc_id = var.vpc_id
+  task_container_image       = var.task_container_image
+  vpc_id                     = var.vpc_id
   task_container_environment = var.task_container_environment
 }
 

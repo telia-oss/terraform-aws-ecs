@@ -1,10 +1,9 @@
 terraform {
-  required_version = ">= 0.12"
+  required_version = ">= 0.14"
 }
 
 provider "aws" {
-  version = ">= 2.17"
-  region  = "eu-west-1"
+  region = "eu-west-1"
 }
 
 data "aws_vpc" "main" {
@@ -12,7 +11,7 @@ data "aws_vpc" "main" {
 }
 
 data "aws_subnet_ids" "main" {
-  vpc_id = "${data.aws_vpc.main.id}"
+  vpc_id = data.aws_vpc.main.id
 }
 
 data "aws_region" "current" {}
@@ -23,7 +22,7 @@ module "alb" {
 
   name_prefix = "example"
   vpc_id      = data.aws_vpc.main.id
-  subnet_ids  = [data.aws_subnet_ids.main.ids]
+  subnet_ids  = data.aws_subnet_ids.main.ids
   type        = "application"
 
   tags = {
@@ -65,7 +64,7 @@ module "cluster" {
 
   name_prefix         = "example"
   vpc_id              = data.aws_vpc.main.id
-  subnet_ids          = [data.aws_subnet_ids.main.ids]
+  subnet_ids          = data.aws_subnet_ids.main.ids
   instance_ami        = data.aws_ami.ecs.id
   load_balancers      = [module.alb.security_group_id]
   load_balancer_count = 1

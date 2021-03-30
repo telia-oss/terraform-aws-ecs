@@ -1,10 +1,9 @@
 terraform {
-  required_version = ">= 0.12"
+  required_version = ">= 0.14"
 }
 
 provider "aws" {
-  version = ">= 2.17"
-  region  = "eu-west-1"
+  region = "eu-west-1"
 }
 
 data "aws_vpc" "main" {
@@ -19,7 +18,7 @@ data "aws_region" "current" {}
 
 module "alb" {
   source  = "telia-oss/loadbalancer/aws"
-  version = "v2.0.0"
+  version = "v3.0.0"
 
   name_prefix = "example"
   vpc_id      = data.aws_vpc.main.id
@@ -120,7 +119,7 @@ module "application" {
   task_container_cpu                = 128
   task_container_memory_reservation = 256
   task_container_command            = []
-  task_container_environment_count  = 1
+
 
   task_container_environment = {
     "TEST" = "VALUE"
@@ -153,8 +152,9 @@ resource "aws_lb_listener_rule" "application" {
   }
 
   condition {
-    field  = "path-pattern"
-    values = ["/app/*"]
+    path_pattern {
+      values = ["/app/*"]
+    }
   }
 }
 
